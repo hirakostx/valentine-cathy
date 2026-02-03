@@ -1,1 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Valentine 💖</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #ff758c, #ff7eb3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Comic Sans MS', cursive;
+    overflow: hidden;
+}
+
+.container {
+    text-align: center;
+    animation: fadeIn 1.5s ease;
+}
+
+h1 {
+    color: white;
+    font-size: 3em;
+    animation: pulse 2s infinite;
+}
+
+img {
+    width: 280px;
+    border-radius: 25px;
+    margin: 20px 0;
+    animation: float 3s ease-in-out infinite;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+button {
+    padding: 15px 35px;
+    margin: 10px;
+    font-size: 1.3em;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: scale(1.2) rotate(-2deg);
+}
+
+#yes {
+    background-color: #ff2e63;
+    color: white;
+}
+
+#no {
+    background-color: #444;
+    color: white;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+.emoji {
+    position: absolute;
+    font-size: 2.5em;
+    animation: fall linear forwards;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="content">
+    <h1>Veux-tu être ma Valentine Cathy ? 💘</h1>
+    <img src="debut.jpg">
+    <br>
+    <button id="yes" onclick="oui()">OUI 💖</button>
+    <button id="no" onclick="non()">NON 😢</button>
+</div>
+
+<script>
+function oui() {
+    document.getElementById("content").innerHTML = `
+        <h1>OUIIIII 😍💘💞💖</h1>
+        <img src="oui.jpg">
+        <h2 style="color:white;">
+            Je savais que tu dirais oui Cathy 💕🥰<br>
+            Je t’aime fort ❤️❤️❤️
+        </h2>
+    `;
+    pluieEmoji();
+}
+
+function non() {
+    alert("😭💔 Impossible… réfléchis encore Cathy stp 🥺");
+}
+
+function pluieEmoji() {
+    const emojis = ["💖","💘","😍","🥰","❤️","💞"];
+    for (let i = 0; i < 50; i++) {
+        const e = document.createElement("div");
+        e.className = "emoji";
+        e.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+        e.style.left = Math.random() * 100 + "vw";
+        e.style.top = "-10%";
+        e.style.animationDuration = (Math.random() * 3 + 2) + "s";
+        document.body.appendChild(e);
+
+        e.animate([
+            { transform: "translateY(0)", opacity: 1 },
+            { transform: "translateY(120vh)", opacity: 0 }
+        ], {
+            duration: 4000,
+            easing: "linear"
+        });
+
+        setTimeout(() => e.remove(), 4000);
+    }
+}
+</script>
+
+</body>
+</html>
 
