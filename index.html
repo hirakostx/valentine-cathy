@@ -2,156 +2,185 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Valentine 💘</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Valentine Cathy 💘</title>
+
   <style>
     :root{
-      --bg1:#ff5f8a;
-      --bg2:#ff9ac1;
-      --yes:#ff2e63;
-      --no:#333;
-      --card:rgba(255,255,255,.14);
-      --shadow:rgba(0,0,0,.28);
+      --glass: rgba(255,255,255,.14);
+      --border: rgba(255,255,255,.20);
+      --shadow: rgba(0,0,0,.35);
+      --yes: #ff2e63;
+      --no: #222;
+      --txt: rgba(255,255,255,.95);
     }
-    *{box-sizing:border-box}
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; margin:0; }
+
     body{
-      margin:0;
-      min-height:100vh;
+      overflow:hidden;
+      font-family: "Comic Sans MS", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:#05060a;
+      color:var(--txt);
+    }
+
+    /* --- 3D background canvas --- */
+    #bg{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      z-index:0;
+      display:block;
+    }
+
+    /* --- UI overlay --- */
+    .ui{
+      position:fixed;
+      inset:0;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-family: "Comic Sans MS", cursive;
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
-      overflow:hidden;
-      user-select:none;
+      z-index:2;
+      pointer-events:none; /* only cards/buttons re-enable */
+      padding: 18px;
     }
-    .wrap{
-      width:min(740px, 92vw);
-      text-align:center;
-      padding:18px;
-      animation: popIn .8s ease;
-    }
-    h1{
-      margin:0 0 12px;
-      color:#fff;
-      font-size:clamp(2rem, 4vw, 3.1rem);
-      text-shadow: 0 12px 30px rgba(0,0,0,.25);
-      animation: pulse 2s infinite;
-    }
-    .sub{
-      color:rgba(255,255,255,.92);
-      margin-top:4px;
-      font-size:1rem;
-      opacity:.95;
-    }
+
     .card{
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,.18);
+      pointer-events:auto;
+      width:min(760px, 92vw);
+      text-align:center;
+      padding: 18px;
       border-radius: 26px;
-      padding: 16px;
-      box-shadow: 0 18px 40px var(--shadow);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      background: var(--glass);
+      border:1px solid var(--border);
+      box-shadow: 0 18px 60px var(--shadow);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      animation: popIn .7s ease;
     }
-    .imgBox{
-      display:flex;
-      justify-content:center;
-      margin: 10px 0 6px;
+
+    h1{
+      margin: 6px 0 10px;
+      font-size: clamp(2rem, 4.2vw, 3.2rem);
+      text-shadow: 0 14px 30px rgba(0,0,0,.35);
+      animation: pulse 1.8s infinite;
     }
-    img{
-      width:min(340px, 82vw);
+
+    .sub{
+      margin: 4px 0 12px;
+      opacity:.95;
+      font-size: 1rem;
+    }
+
+    .imgBox{ display:flex; justify-content:center; margin: 10px 0 6px; }
+    img.photo{
+      width:min(360px, 86vw);
       border-radius: 22px;
-      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+      box-shadow: 0 16px 44px rgba(0,0,0,.45);
       animation: float 3s ease-in-out infinite;
       background: rgba(255,255,255,.08);
     }
+
     .row{
+      position:relative;
+      height: 96px; /* zone de jeu pour le bouton NON */
       margin-top: 12px;
-      position: relative;
-      height: 90px; /* zone pour que le bouton NON bouge */
     }
-    .btn{
-      border:none;
-      border-radius:999px;
-      padding:14px 26px;
-      font-size:1.15rem;
-      cursor:pointer;
-      box-shadow: 0 12px 28px rgba(0,0,0,.25);
-      transition: transform .15s ease, filter .15s ease;
+
+    button.btn{
       position:absolute;
       top: 18px;
+      border:none;
+      border-radius: 999px;
+      padding: 14px 26px;
+      font-size: 1.15rem;
+      cursor:pointer;
+      box-shadow: 0 12px 28px rgba(0,0,0,.28);
+      transition: transform .12s ease, filter .12s ease;
+      user-select:none;
+      will-change: transform, left, top;
     }
-    .btn:active{ transform: scale(.98); }
+    button.btn:active{ transform: scale(.98); }
+
     #yesBtn{
-      left: 25%;
+      left: 26%;
       transform: translateX(-50%);
       background: var(--yes);
       color:#fff;
     }
-    #yesBtn:hover{ transform: translateX(-50%) scale(1.06); filter:brightness(1.06); }
+    #yesBtn:hover{ transform: translateX(-50%) scale(1.06); filter:brightness(1.05); }
+
     #noBtn{
-      left: 75%;
+      left: 74%;
       transform: translateX(-50%);
       background: var(--no);
       color:#fff;
     }
-    .hint{
+
+    .tip{
       margin-top:10px;
-      color:rgba(255,255,255,.95);
       font-size:.95rem;
-    }
-    .tiny{
-      margin-top:6px;
-      color:rgba(255,255,255,.85);
-      font-size:.9rem;
+      opacity:.92;
     }
 
-    /* Modal */
+    .tiny{
+      margin-top:6px;
+      font-size:.9rem;
+      opacity:.85;
+    }
+
+    /* --- modal --- */
     .modalOverlay{
       position:fixed; inset:0;
-      background: rgba(0,0,0,.45);
       display:none;
       align-items:center;
       justify-content:center;
-      padding:18px;
-      z-index:50;
+      z-index:5;
+      background: rgba(0,0,0,.42);
+      padding: 18px;
     }
     .modal{
-      width:min(520px, 92vw);
-      background: rgba(255,255,255,.92);
+      width:min(560px, 92vw);
+      background: rgba(255,255,255,.93);
+      color:#111;
       border-radius: 22px;
-      padding: 18px 16px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.35);
-      animation: popIn .25s ease;
+      padding: 16px 14px;
+      box-shadow: 0 22px 70px rgba(0,0,0,.45);
       text-align:center;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      animation: popIn .2s ease;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
-    .modal h2{ margin:0 0 10px; }
-    .modal p{ margin:0 0 14px; }
-    .modal .mrow{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    .modal h2{ margin: 4px 0 10px; }
+    .modal p{ margin: 0 0 14px; }
+    .mrow{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
     .mBtn{
       border:none;
-      border-radius: 999px;
+      border-radius:999px;
       padding: 10px 16px;
-      font-weight:700;
+      font-weight: 800;
       cursor:pointer;
     }
     .mYes{ background:#ff2e63; color:#fff; }
     .mNo{ background:#111; color:#fff; }
     .mOk{ background:#1f8bff; color:#fff; }
 
-    /* Emojis */
-    .emoji{
-      position:fixed;
-      top:-10vh;
-      font-size:2.2rem;
-      pointer-events:none;
-      filter: drop-shadow(0 10px 12px rgba(0,0,0,.25));
-      z-index:60;
-    }
-
-    /* Effects */
+    /* --- effects --- */
     .shake{ animation: shake .45s ease; }
+
+    @keyframes popIn{
+      from{ opacity:0; transform: translateY(10px) scale(.98); }
+      to{ opacity:1; transform: translateY(0) scale(1); }
+    }
+    @keyframes pulse{
+      0%,100%{ transform: scale(1); }
+      50%{ transform: scale(1.04); }
+    }
+    @keyframes float{
+      0%,100%{ transform: translateY(0); }
+      50%{ transform: translateY(-12px); }
+    }
     @keyframes shake{
       0%,100%{ transform: translateX(0); }
       20%{ transform: translateX(-10px); }
@@ -159,34 +188,52 @@
       60%{ transform: translateX(-8px); }
       80%{ transform: translateX(8px); }
     }
-    @keyframes float{
-      0%,100%{ transform: translateY(0); }
-      50%{ transform: translateY(-12px); }
+
+    /* --- Twemoji SVG particles (ultra net) --- */
+    .emoji{
+      position:fixed;
+      top:-12vh;
+      width: 42px;
+      height: 42px;
+      pointer-events:none;
+      z-index:6;
+      filter: drop-shadow(0 12px 14px rgba(0,0,0,.28));
+      will-change: transform, opacity;
     }
-    @keyframes popIn{
-      from{ opacity:0; transform: translateY(10px) scale(.98); }
-      to{ opacity:1; transform: translateY(0) scale(1); }
-    }
-    @keyframes pulse{
-      0%,100%{ transform:scale(1); }
-      50%{ transform:scale(1.04); }
+
+    /* small FPS badge */
+    #fpsBadge{
+      position:fixed;
+      bottom:12px; left:12px;
+      z-index:10;
+      background: rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.18);
+      color: rgba(255,255,255,.9);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font: 700 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      user-select:none;
     }
   </style>
 </head>
+
 <body>
+  <canvas id="bg"></canvas>
 
-  <div class="wrap">
-    <h1>Veux-tu être ma Valentine Cathy ? 💘</h1>
-
+  <div class="ui">
     <div class="card" id="card">
+      <h1>Veux-tu être ma Valentine Cathy ? 💘</h1>
+
       <div class="imgBox">
-        <img id="mainImg" src="debut.jpg" alt="début"
-          onerror="this.style.display='none'; document.getElementById('imgError').style.display='block';" />
+        <img class="photo" id="mainImg" src="debut.jpg" alt="debut"
+          onerror="this.style.display='none'; document.getElementById('imgErr').style.display='block';" />
       </div>
 
-      <div id="imgError" style="display:none; color:white; font-size:0.95rem; padding:10px;">
+      <div id="imgErr" style="display:none; padding:10px; font-size:.95rem;">
         ⚠️ Image introuvable.<br>
-        Vérifie que ça s’appelle <b>debut.jpg</b> (à la racine du repo).
+        Renomme ton fichier exactement <b>debut.jpg</b> et mets-le à la racine du repo.
       </div>
 
       <div class="sub">Réponds honnêtement… 😇</div>
@@ -196,225 +243,375 @@
         <button class="btn" id="noBtn">NON 😭</button>
       </div>
 
-      <div class="hint">✨ Pro tip : le bouton NON est… un peu timide.</div>
-      <div class="tiny">Si la page est blanche/bug → Ctrl+F5 ou navigation privée.</div>
+      <div class="tip">Le bouton NON est timide… il esquive 😏</div>
+      <div class="tiny">Si tu vois l’ancienne version : ouvre en navigation privée ou ajoute <b>?v=123</b> à l’URL.</div>
     </div>
   </div>
 
-  <!-- Modal -->
   <div class="modalOverlay" id="modalOverlay">
-    <div class="modal" id="modal">
+    <div class="modal">
       <h2 id="mTitle">T’es sûre ? 😳</h2>
-      <p id="mText">Parce que moi je suis très sérieux là… 💘</p>
+      <p id="mText">Parce que moi je suis TRÈS sérieux là… 💘</p>
       <div class="mrow" id="mRow"></div>
     </div>
   </div>
 
-<script>
-  const yesBtn = document.getElementById('yesBtn');
-  const noBtn  = document.getElementById('noBtn');
-  const playZone = document.getElementById('playZone');
-  const card = document.getElementById('card');
+  <div id="fpsBadge">FPS: --</div>
 
-  const modalOverlay = document.getElementById('modalOverlay');
-  const mTitle = document.getElementById('mTitle');
-  const mText  = document.getElementById('mText');
-  const mRow   = document.getElementById('mRow');
+  <!-- three.js for the 3D minecraft-ish background -->
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <!-- Twemoji for ultra clean SVG emojis -->
+  <script src="https://unpkg.com/twemoji@14.0.2/dist/twemoji.min.js"></script>
 
-  // --- Helpers
-  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
-
-  function setNoPos(px, py){
-    // px/py inside playZone
-    const zone = playZone.getBoundingClientRect();
-    const btn  = noBtn.getBoundingClientRect();
-    const bw = btn.width, bh = btn.height;
-
-    const x = clamp(px, 10, zone.width - bw - 10);
-    const y = clamp(py, 8, zone.height - bh - 8);
-
-    noBtn.style.left = (x + bw/2) + "px";
-    noBtn.style.top  = (y) + "px";
-    noBtn.style.transform = "translateX(-50%)";
-  }
-
-  function randomizeNoPosition(){
-    const zone = playZone.getBoundingClientRect();
-    const btn  = noBtn.getBoundingClientRect();
-    const bw = btn.width, bh = btn.height;
-
-    const x = Math.random() * (zone.width - bw - 20) + 10;
-    const y = Math.random() * (zone.height - bh - 16) + 8;
-    setNoPos(x, y);
-  }
-
-  function rain(emojis, count){
-    for(let i=0;i<count;i++){
-      const e = document.createElement('div');
-      e.className = 'emoji';
-      e.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-      e.style.left = (Math.random()*100) + "vw";
-      e.style.opacity = (Math.random()*0.5 + 0.45).toFixed(2);
-      const dur = Math.random()*2200 + 2200;
-      document.body.appendChild(e);
-
-      const startX = (Math.random()*40 - 20);
-      const endX = (Math.random()*140 - 70);
-      e.animate([
-        { transform:`translate(${startX}px,0) rotate(0deg)`, opacity: e.style.opacity },
-        { transform:`translate(${endX}px,120vh) rotate(${Math.random()*360}deg)`, opacity: 0 }
-      ], { duration: dur, easing: 'linear' });
-
-      setTimeout(()=>e.remove(), dur+30);
-    }
-  }
-
-  function shake(){
-    card.classList.remove('shake');
-    void card.offsetWidth;
-    card.classList.add('shake');
-  }
-
-  // --- Make NO dodge the mouse
-  // Trigger on mousemove close to the button
-  playZone.addEventListener('mousemove', (ev)=>{
-    const zone = playZone.getBoundingClientRect();
-    const bx = ev.clientX - zone.left;
-    const by = ev.clientY - zone.top;
-
-    const nb = noBtn.getBoundingClientRect();
-    const nbx = (nb.left + nb.width/2) - zone.left;
-    const nby = (nb.top + nb.height/2) - zone.top;
-
-    const dx = bx - nbx;
-    const dy = by - nby;
-    const dist = Math.hypot(dx, dy);
-
-    // if mouse comes within 90px, dodge
-    if(dist < 90){
-      // push away from mouse
-      const push = 140;
-      const px = nbx - (dx / (dist || 1)) * push;
-      const py = nby - (dy / (dist || 1)) * (push * 0.35);
-
-      setNoPos(px - (noBtn.getBoundingClientRect().width/2), py - 18);
-    }
-  });
-
-  // Also dodge on hover / touch
-  noBtn.addEventListener('mouseenter', randomizeNoPosition);
-  noBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); randomizeNoPosition(); }, {passive:false});
-
-  // --- If she actually clicks NO: punish (fun)
-  let noClicks = 0;
-  noBtn.addEventListener('click', ()=>{
-    noClicks++;
-    shake();
-    rain(["💔","😭","😡","🫠","🥲","😤"], 45);
-
-    const lines = [
-      "EH ??? 😭",
-      "T’es sérieuse là ? 💔",
-      "Non non non… re-choisis 😤",
-      "Cathy stp… j’ai le cœur fragile 🥺",
-      "Tu peux pas dire non à ça… 😭💔",
-      "Dernière chance… sinon je pleure fort 😭😭"
-    ];
-    alert(lines[Math.min(noClicks-1, lines.length-1)]);
-
-    // make it even harder next time
-    randomizeNoPosition();
-  });
-
-  // --- YES hesitation flow (multi-step modal)
-  const steps = [
-    { title:"T’es sûre de ça ? 😳", text:"Genre… vraiment vraiment ? 💘", buttons:[["Oui j’suis sûre 💖","yes"],["Euh… attends 🤭","no"]] },
-    { title:"Réfléchis bien 😭", text:"Parce que moi je dis OUI direct 😍", buttons:[["OK OUI 💘","yes"],["Je panique 😵","no"]] },
-    { title:"Dernière confirmation 😤", text:"Après ça, c’est officiel 😏💍", buttons:[["OUIII 😍💖","final"],["J’ai peur 😭","no"]] }
-  ];
-  let stepIndex = 0;
-
-  function openModal(step){
-    modalOverlay.style.display = "flex";
-    mTitle.textContent = step.title;
-    mText.textContent  = step.text;
-    mRow.innerHTML = "";
-
-    step.buttons.forEach(([label, action])=>{
-      const b = document.createElement('button');
-      b.className = "mBtn " + (action==="no" ? "mNo" : action==="final" ? "mYes" : "mOk");
-      if(action==="yes") b.className = "mBtn mOk";
-      if(action==="final") b.className = "mBtn mYes";
-      b.textContent = label;
-      b.onclick = ()=> handleModal(action);
-      mRow.appendChild(b);
+  <script>
+    /*********************
+     * 3D "Minecraft-ish" background
+     * - Instanced voxel grid
+     * - Moving camera for parallax
+     * - Simple pixel-ish colors (no copyrighted textures)
+     *********************/
+    const canvas = document.getElementById('bg');
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: false,
+      powerPreference: "high-performance",
+      alpha: false
     });
-  }
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
 
-  function closeModal(){ modalOverlay.style.display = "none"; }
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x06070c);
 
-  function handleModal(action){
-    if(action === "no"){
-      closeModal();
+    const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
+    camera.position.set(0, 10, 26);
+
+    // Lights
+    const hemi = new THREE.HemisphereLight(0xffcfe0, 0x2b2f55, 1.1);
+    scene.add(hemi);
+    const dir = new THREE.DirectionalLight(0xffffff, 0.65);
+    dir.position.set(10, 18, 12);
+    scene.add(dir);
+
+    // Voxel instancing
+    const boxGeo = new THREE.BoxGeometry(1,1,1);
+
+    // A slightly "pixel" look by using MeshLambertMaterial (fast)
+    const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+
+    const sizeX = 44, sizeZ = 44;
+    const count = sizeX * sizeZ;
+    const mesh = new THREE.InstancedMesh(boxGeo, mat, count);
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    scene.add(mesh);
+
+    // Per-instance colors
+    const color = new THREE.Color();
+    const colors = new Float32Array(count * 3);
+    const dummy = new THREE.Object3D();
+
+    // Height map (simple, smooth)
+    const heights = new Float32Array(count);
+    let idx = 0;
+    for (let x=0; x<sizeX; x++){
+      for (let z=0; z<sizeZ; z++){
+        const nx = (x - sizeX/2) / (sizeX/2);
+        const nz = (z - sizeZ/2) / (sizeZ/2);
+        // smooth-ish terrain
+        const h = 2.2*Math.sin(nx*2.8) + 2.0*Math.cos(nz*2.6) + 1.4*Math.sin((nx+nz)*3.0);
+        heights[idx++] = h;
+      }
+    }
+
+    // assign instances
+    idx = 0;
+    for (let x=0; x<sizeX; x++){
+      for (let z=0; z<sizeZ; z++){
+        const i = idx++;
+        const h = heights[i];
+
+        // position
+        dummy.position.set(
+          (x - sizeX/2) * 1.05,
+          Math.max(-2.5, h*0.55),
+          (z - sizeZ/2) * 1.05
+        );
+
+        // random slight scale variation (keeps it "blocky")
+        const s = 1.0;
+        dummy.scale.set(s, s, s);
+        dummy.rotation.set(0, 0, 0);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+
+        // color like minecraft-ish (grass/dirt/stone) without textures
+        // top areas greener, low areas darker/stone
+        const t = THREE.MathUtils.clamp((h + 4) / 8, 0, 1);
+        // blend
+        const r = THREE.MathUtils.lerp(0.18, 0.38, t);
+        const g = THREE.MathUtils.lerp(0.22, 0.62, t);
+        const b = THREE.MathUtils.lerp(0.28, 0.34, t);
+        color.setRGB(r, g, b);
+
+        colors[i*3+0] = color.r;
+        colors[i*3+1] = color.g;
+        colors[i*3+2] = color.b;
+      }
+    }
+
+    mesh.geometry.setAttribute('color', new THREE.InstancedBufferAttribute(colors, 3));
+
+    function resize(){
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Mouse parallax
+    let mx = 0, my = 0;
+    window.addEventListener('mousemove', (e)=>{
+      mx = (e.clientX / window.innerWidth) * 2 - 1;
+      my = (e.clientY / window.innerHeight) * 2 - 1;
+    }, {passive:true});
+
+    // FPS badge
+    const fpsBadge = document.getElementById('fpsBadge');
+    let lastT = performance.now(), frames = 0, fps = 0;
+
+    function animate(t){
+      requestAnimationFrame(animate);
+
+      // FPS calc
+      frames++;
+      if (t - lastT >= 500){
+        fps = Math.round((frames * 1000) / (t - lastT));
+        fpsBadge.textContent = "FPS: " + fps;
+        frames = 0;
+        lastT = t;
+      }
+
+      // camera motion
+      const tt = t * 0.00035;
+      const orbit = 26;
+      const camX = Math.sin(tt) * 8 + mx * 1.5;
+      const camZ = orbit + Math.cos(tt) * 2;
+      const camY = 10 + Math.sin(tt*1.7)*0.8 - my*1.2;
+
+      camera.position.set(camX, camY, camZ);
+      camera.lookAt(0, 2.5, 0);
+
+      renderer.render(scene, camera);
+    }
+    requestAnimationFrame(animate);
+
+    /*********************
+     * UI logic: NO dodges, YES hesitation modal, SVG emoji rain
+     *********************/
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn  = document.getElementById('noBtn');
+    const playZone = document.getElementById('playZone');
+    const card = document.getElementById('card');
+
+    const modalOverlay = document.getElementById('modalOverlay');
+    const mTitle = document.getElementById('mTitle');
+    const mText  = document.getElementById('mText');
+    const mRow   = document.getElementById('mRow');
+
+    function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+    function setNoPos(leftPx, topPx){
+      const zone = playZone.getBoundingClientRect();
+      const btn = noBtn.getBoundingClientRect();
+      const bw = btn.width, bh = btn.height;
+
+      const x = clamp(leftPx, 10, zone.width - bw - 10);
+      const y = clamp(topPx, 8, zone.height - bh - 8);
+
+      noBtn.style.left = (x + bw/2) + "px";
+      noBtn.style.top  = y + "px";
+      noBtn.style.transform = "translateX(-50%)";
+    }
+
+    function randomizeNo(){
+      const zone = playZone.getBoundingClientRect();
+      const btn = noBtn.getBoundingClientRect();
+      const bw = btn.width, bh = btn.height;
+
+      const x = Math.random() * (zone.width - bw - 20) + 10;
+      const y = Math.random() * (zone.height - bh - 16) + 8;
+      setNoPos(x, y);
+    }
+
+    function shake(){
+      card.classList.remove('shake');
+      void card.offsetWidth;
+      card.classList.add('shake');
+    }
+
+    // Ultra clean emoji rain using Twemoji SVG
+    function twemojiUrl(emoji){
+      const codepoint = twemoji.convert.toCodePoint(emoji);
+      return `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${codepoint}.svg`;
+    }
+
+    function rain(emojis, count){
+      for(let i=0;i<count;i++){
+        const img = document.createElement('img');
+        img.className = "emoji";
+        const em = emojis[Math.floor(Math.random()*emojis.length)];
+        img.src = twemojiUrl(em);
+        img.alt = em;
+
+        img.style.left = (Math.random()*100) + "vw";
+        img.style.opacity = (Math.random()*0.45 + 0.55).toFixed(2);
+
+        const size = Math.random()*26 + 34; // 34..60
+        img.style.width = size + "px";
+        img.style.height = size + "px";
+
+        const dur = Math.random()*2200 + 2200;
+        document.body.appendChild(img);
+
+        const startX = (Math.random()*40 - 20);
+        const endX = (Math.random()*160 - 80);
+        img.animate([
+          { transform:`translate(${startX}px,0) rotate(0deg)`, opacity: img.style.opacity },
+          { transform:`translate(${endX}px,120vh) rotate(${Math.random()*360}deg)`, opacity: 0 }
+        ], { duration: dur, easing: 'linear' });
+
+        setTimeout(()=> img.remove(), dur + 40);
+      }
+    }
+
+    // NO dodges mouse
+    playZone.addEventListener('mousemove', (ev)=>{
+      const zone = playZone.getBoundingClientRect();
+      const bx = ev.clientX - zone.left;
+      const by = ev.clientY - zone.top;
+
+      const nb = noBtn.getBoundingClientRect();
+      const nbx = (nb.left + nb.width/2) - zone.left;
+      const nby = (nb.top + nb.height/2) - zone.top;
+
+      const dx = bx - nbx;
+      const dy = by - nby;
+      const dist = Math.hypot(dx, dy);
+
+      if(dist < 95){
+        const push = 150;
+        const px = nbx - (dx / (dist || 1)) * push;
+        const py = nby - (dy / (dist || 1)) * (push * 0.30);
+        setNoPos(px - (nb.width/2), py - 18);
+      }
+    }, {passive:true});
+
+    noBtn.addEventListener('mouseenter', randomizeNo);
+    noBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); randomizeNo(); }, {passive:false});
+
+    // NO click drama
+    let noClicks = 0;
+    noBtn.addEventListener('click', ()=>{
+      noClicks++;
       shake();
-      rain(["😵","😳","🙃","🫣"], 25);
-      alert("🤣 vas-y… clique OUI quand t’es prête !");
-      return;
-    }
-    if(action === "yes"){
-      stepIndex = Math.min(stepIndex+1, steps.length-1);
-      openModal(steps[stepIndex]);
-      return;
-    }
-    if(action === "final"){
-      closeModal();
-      successScreen();
-    }
-  }
+      rain(["💔","😭","😡","🥲","😤","🫠"], 48);
 
-  yesBtn.addEventListener('click', ()=>{
-    stepIndex = 0;
-    openModal(steps[0]);
-    rain(["✨","💘","💖"], 18);
-  });
+      const msgs = [
+        "EH ??? 😭",
+        "T’es sérieuse là ? 💔",
+        "Non non non… re-choisis 😤",
+        "Cathy stp… j’ai le cœur fragile 🥺",
+        "Tu peux pas dire non à ça… 😭💔",
+        "DERNIÈRE CHANCE 😭😭"
+      ];
+      alert(msgs[Math.min(noClicks-1, msgs.length-1)]);
+      randomizeNo();
+    });
 
-  // --- Success screen
-  function successScreen(){
-    document.querySelector('.wrap').innerHTML = `
-      <div class="wrap">
-        <h1>OUIIIII 😍💘💞💖</h1>
-        <div class="card">
+    // YES hesitation modal flow
+    const steps = [
+      { title:"T’es sûre de ça ? 😳", text:"Genre… vraiment vraiment ? 💘", buttons:[["Oui j’suis sûre 💖","next"],["Euh… attends 🤭","close"]] },
+      { title:"Réfléchis bien 😭", text:"Parce que moi je dis OUI direct 😍", buttons:[["OK OUI 💘","next"],["Je panique 😵","close"]] },
+      { title:"Dernière confirmation 😤", text:"Après ça, c’est officiel 😏💍", buttons:[["OUIII 😍💖","final"],["J’ai peur 😭","close"]] }
+    ];
+    let stepIndex = 0;
+
+    function openModal(step){
+      modalOverlay.style.display = "flex";
+      mTitle.textContent = step.title;
+      mText.textContent  = step.text;
+      mRow.innerHTML = "";
+
+      step.buttons.forEach(([label, action])=>{
+        const b = document.createElement('button');
+        b.className = "mBtn " + (action === "final" ? "mYes" : action === "next" ? "mOk" : "mNo");
+        b.textContent = label;
+        b.onclick = ()=> onModal(action);
+        mRow.appendChild(b);
+      });
+    }
+    function closeModal(){ modalOverlay.style.display = "none"; }
+
+    function onModal(action){
+      if(action === "close"){
+        closeModal();
+        shake();
+        rain(["🫣","😳","🙃","😵"], 24);
+        alert("🤣 vas-y… clique OUI quand t’es prête !");
+        return;
+      }
+      if(action === "next"){
+        stepIndex = Math.min(stepIndex + 1, steps.length - 1);
+        openModal(steps[stepIndex]);
+        return;
+      }
+      if(action === "final"){
+        closeModal();
+        successScreen();
+      }
+    }
+
+    yesBtn.addEventListener('click', ()=>{
+      stepIndex = 0;
+      openModal(steps[0]);
+      rain(["✨","💘","💖"], 18);
+    });
+
+    modalOverlay.addEventListener('click', (e)=>{
+      if(e.target === modalOverlay) closeModal();
+    });
+
+    function successScreen(){
+      document.querySelector('.ui').innerHTML = `
+        <div class="card" id="card2">
+          <h1>OUIIIII 😍💘💞💖</h1>
           <div class="imgBox">
-            <img src="oui.jpg" alt="oui"
-              onerror="this.style.display='none'; document.getElementById('imgError2').style.display='block';" />
+            <img class="photo" src="oui.jpg" alt="oui"
+              onerror="this.style.display='none'; document.getElementById('imgErr2').style.display='block';" />
           </div>
-          <div id="imgError2" style="display:none; color:white; font-size:0.95rem; padding:10px;">
+          <div id="imgErr2" style="display:none; padding:10px; font-size:.95rem;">
             ⚠️ Image introuvable.<br>
-            Vérifie que ça s’appelle <b>oui.jpg</b> (à la racine du repo).
+            Renomme ton fichier exactement <b>oui.jpg</b> et mets-le à la racine du repo.
           </div>
-          <div class="sub" style="margin-top:6px;">
-            Cathy… t’es ma Valentine officielle 😭❤️
+          <div class="sub" style="font-size:1.15rem; margin-top:8px;">
+            Cathy 💕 tu viens de me rendre trop heureux 😭❤️
           </div>
-          <div class="sub">Je t’aime fort 💖💖💖</div>
-          <div class="tiny" style="margin-top:10px;">(capture d’écran obligatoire 😌)</div>
+          <div class="sub">Officiel : ma Valentine 💍💖</div>
+          <div class="tiny">(capture d’écran obligatoire 😌)</div>
         </div>
-      </div>
-    `;
-    rain(["💖","💘","😍","🥰","❤️","💞","🌹","✨"], 90);
-    setTimeout(()=> rain(["💖","💘","😍","🥰","❤️","💞","🌹","✨"], 90), 800);
-  }
+      `;
+      rain(["💖","💘","😍","🥰","❤️","💞","🌹","✨"], 110);
+      setTimeout(()=> rain(["💖","💘","😍","🥰","❤️","💞","🌹","✨"], 130), 650);
+    }
 
-  // Start position for NO to avoid being stuck
-  window.addEventListener('load', ()=> {
-    // ensure zone measurements are correct
-    randomizeNoPosition();
-  });
-
-  // Close modal when clicking outside
-  modalOverlay.addEventListener('click', (e)=>{
-    if(e.target === modalOverlay) closeModal();
-  });
-</script>
-
+    // initial NO position once layout is ready
+    window.addEventListener('load', ()=> {
+      randomizeNo();
+      // warm emoji small burst to show quality
+      rain(["✨","💖"], 8);
+    });
+  </script>
 </body>
 </html>
