@@ -1,229 +1,906 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Cath × Momo 💘</title>
 
 <style>
+:root{
+  --pink:#ff2e63;
+  --dark:#0b0c12;
+  --glass:rgba(255,255,255,.12);
+  --border:rgba(255,255,255,.22);
+  --shadow:rgba(0,0,0,.45);
+  --txt:rgba(255,255,255,.95);
+}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden;font-family:system-ui;background:#05060a;color:#fff}
-button{font:inherit;cursor:pointer}
+html,body{height:100%;margin:0;overflow:hidden}
+body{
+  font-family:"Comic Sans MS", system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background:#04050a;
+  color:var(--txt);
+  user-select:none;
+}
+button{font-family:inherit}
+.hidden{display:none !important}
 
-.hidden{display:none}
-.center{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+/* ====== BACKGROUND LAYERS ====== */
+#bg{
+  position:fixed; inset:0; z-index:0;
+  background: radial-gradient(circle at 50% 20%, rgba(255,46,99,.08), transparent 60%),
+              radial-gradient(circle at 80% 30%, rgba(120,190,255,.10), transparent 60%),
+              radial-gradient(circle at 30% 80%, rgba(200,255,220,.06), transparent 60%),
+              #04050a;
+}
+#bg::before{
+  content:"";
+  position:absolute; inset:-20%;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,.06) 0 2px, transparent 3px),
+    radial-gradient(circle at 70% 20%, rgba(255,255,255,.05) 0 2px, transparent 3px),
+    radial-gradient(circle at 55% 75%, rgba(255,255,255,.05) 0 2px, transparent 3px);
+  filter: blur(.2px);
+  opacity:.7;
+  animation:bgDrift 20s linear infinite;
+}
+@keyframes bgDrift{
+  from{ transform: translate3d(0,0,0) rotate(0deg); }
+  to{ transform: translate3d(-6%,2%,0) rotate(2deg); }
+}
 
-/* ===== GLOBAL FX ===== */
-@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
-@keyframes glitch{0%,100%{transform:none}20%{transform:translateX(-2px)}40%{transform:translateX(2px)}60%{transform:translateX(-1px)}}
-@keyframes float{50%{transform:translateY(-18px)}}
+.pattern{
+  position:fixed; inset:-50%;
+  z-index:1; pointer-events:none;
+  opacity:1;
+}
+.pattern::before{
+  content:"Cath × Momo   Cath × Momo   Cath × Momo   Cath × Momo   Cath × Momo   ";
+  position:absolute; inset:0;
+  font-size:3rem;
+  opacity:.085;
+  white-space:nowrap;
+  transform: rotate(-20deg);
+  animation: patternScroll 38s linear infinite;
+}
+@keyframes patternScroll{
+  from{ transform: translateX(0) rotate(-20deg); }
+  to{ transform: translateX(-50%) rotate(-20deg); }
+}
 
-/* ===== STARS ===== */
-#stars{position:fixed;inset:0;pointer-events:none}
-.star{position:absolute;font-size:18px;animation:tw 2.4s ease-in-out infinite}
-@keyframes tw{0%{opacity:0}50%{opacity:.9}100%{opacity:0}}
+#stars{position:fixed; inset:0; z-index:1; pointer-events:none}
+.star{
+  position:absolute;
+  font-size:18px;
+  opacity:0;
+  animation: twinkle 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 10px 16px rgba(0,0,0,.28));
+}
+@keyframes twinkle{
+  0%{opacity:0; transform: translateY(0) scale(.9)}
+  35%{opacity:.9}
+  70%{opacity:.25}
+  100%{opacity:0; transform: translateY(-14px) scale(1.1)}
+}
 
-/* ===== MOON ===== */
 .moon{
-  position:fixed;top:10%;right:8%;
-  width:140px;height:140px;border-radius:50%;
-  background:radial-gradient(circle at 30% 30%,#fff,#d0d0d0 60%,#aaa);
-  box-shadow:0 0 50px rgba(255,255,255,.4);
-  animation:float 6s ease-in-out infinite;
+  position:fixed;
+  top:9%; right:7%;
+  width:150px; height:150px;
+  border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, #fff, #d9d9d9 60%, #aaa 100%);
+  box-shadow:0 0 55px rgba(255,255,255,.42);
+  z-index:1; pointer-events:none;
+  animation: moonFloat 6.5s ease-in-out infinite;
+  transition: transform .12s ease, box-shadow .25s ease;
 }
+@keyframes moonFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-18px)}
+}
+.moon.glow{ box-shadow:0 0 95px rgba(255,170,215,.95); }
 
-/* ===== BOX ===== */
-.box{
-  background:rgba(255,255,255,.12);
-  border:1px solid rgba(255,255,255,.2);
-  border-radius:22px;
+/* ====== UI CARD ====== */
+.ui{
+  position:fixed; inset:0;
+  z-index:2;
+  display:flex; align-items:center; justify-content:center;
+  padding:18px;
+}
+.card{
+  width:min(820px, 92vw);
   padding:22px;
-  width:min(720px,92vw);
+  border-radius:26px;
+  background:var(--glass);
+  border:1px solid var(--border);
+  box-shadow:0 18px 60px var(--shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   text-align:center;
-  animation:pop .4s ease;
-  backdrop-filter:blur(10px);
+  animation: popIn .5s ease;
 }
+@keyframes popIn{
+  from{opacity:0; transform: translateY(10px) scale(.98)}
+  to{opacity:1; transform: translateY(0) scale(1)}
+}
+h1{margin:4px 0 10px; font-size: clamp(1.9rem, 4vw, 3rem); text-shadow:0 16px 34px rgba(0,0,0,.35)}
+.sub{opacity:.95;margin:0 0 10px}
+.toast{min-height:34px; display:flex; justify-content:center; margin:6px 0 10px}
+.toast span{
+  display:inline-block;
+  padding:7px 12px;
+  border-radius:999px;
+  background:rgba(0,0,0,.24);
+  border:1px solid rgba(255,255,255,.14);
+  backdrop-filter: blur(8px);
+}
+.tip{margin-top:10px; opacity:.9; font-size:.95rem}
 
-/* ===== BUTTONS ===== */
-.btn{padding:12px 20px;border:none;border-radius:999px;margin:8px;font-weight:800}
-.yes{background:#ff2e63;color:#fff}
-.no{background:#222;color:#fff;position:absolute}
+/* ====== BUTTONS ====== */
+.row{
+  position:relative;
+  height:120px;
+  margin-top:10px;
+}
+.btn{
+  position:absolute;
+  top:32px;
+  border:none;
+  border-radius:999px;
+  padding:14px 28px;
+  font-size:1.15rem;
+  cursor:pointer;
+  box-shadow:0 12px 28px rgba(0,0,0,.35);
+  transition: transform .12s ease, filter .12s ease, left .18s ease, top .18s ease;
+  user-select:none;
+}
+.btn:active{transform:scale(.98)}
+.yes{background:var(--pink); color:#fff}
+.no{background:#111; color:#fff}
 
-/* ===== VIRUS ===== */
-.console{
-  background:#000;
-  border-radius:14px;
-  padding:12px;
-  height:160px;
+/* ====== OVERLAYS ====== */
+.overlay{
+  position:fixed; inset:0; z-index:10;
+  display:flex; align-items:center; justify-content:center;
+  padding:18px;
+  background:rgba(0,0,0,.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.window{
+  width:min(900px,92vw);
+  border-radius:24px;
+  background:rgba(10,12,18,.92);
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 25px 90px rgba(0,0,0,.62);
   overflow:hidden;
-  text-align:left;
-  font:12px monospace;
-  margin:12px 0;
+  animation: popIn .35s ease;
 }
-.line{opacity:.85}
-.warn{color:#ff7b9c}
+.winTop{
+  display:flex; align-items:center; gap:10px;
+  padding:12px 14px;
+  background:rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(255,255,255,.10);
+  font:900 13px/1 system-ui;
+  opacity:.95;
+}
+.dot{width:10px;height:10px;border-radius:50%}
+.red{background:#ff3b3b}.yel{background:#ffd43b}.grn{background:#2dff76}
+.winBody{padding:16px; text-align:center}
 
-/* ===== MINI GAME ===== */
-#gameCanvas{background:#87ceeb;border-radius:16px}
+.glitch{
+  animation: glitch 1.2s infinite;
+  text-shadow:0 16px 40px rgba(0,0,0,.35);
+}
+@keyframes glitch{
+  0%,100%{transform:none; filter:none}
+  20%{transform:translateX(-2px); filter: blur(.2px)}
+  40%{transform:translateX(2px); filter: contrast(1.1)}
+  60%{transform:translateX(-1px); filter: saturate(1.15)}
+  80%{transform:translateX(1px); filter: blur(.1px)}
+}
 
-/* ===== FINAL ===== */
-#final p{font-size:1.2rem}
+.progressWrap{margin:12px auto 8px; width:min(680px,96%)}
+.progressBar{
+  height:12px;border-radius:999px;overflow:hidden;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.12);
+}
+.progressFill{
+  height:100%; width:0%;
+  background:linear-gradient(90deg, rgba(255,46,99,.95), rgba(255,255,255,.75));
+  border-radius:999px;
+}
+.pct{margin-top:8px;font-weight:1000;opacity:.92}
+
+.console{
+  margin:12px auto 0;
+  width:min(780px,96%);
+  height:180px;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  padding:10px 12px;
+  text-align:left;
+  overflow:hidden;
+  font: 700 12px/1.35 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono";
+}
+.consoleLine{opacity:.9}
+.consoleLine.dim{opacity:.6}
+.consoleLine.warn{color:#ffb3c7}
+
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:14px 0 0}
+.actionBtn{
+  border:none;border-radius:999px;
+  padding:12px 18px;
+  font-weight:1000;
+  cursor:pointer;
+  box-shadow:0 12px 28px rgba(0,0,0,.35);
+  transition: transform .12s ease, filter .12s ease;
+}
+.actionBtn:hover{transform:scale(1.05); filter:brightness(1.04)}
+.primary{background:rgba(255,46,99,.95);color:#fff}
+.secondary{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.18)}
+.small{margin-top:10px;opacity:.78}
+
+/* ====== MINI GAME ====== */
+#gameOverlay{z-index:20}
+.gameShell{
+  width:min(560px,92vw);
+  background:#1f1f1f;
+  border-radius:24px;
+  padding:14px;
+  box-shadow:0 20px 70px rgba(0,0,0,.45);
+}
+.gameHud{
+  display:flex;justify-content:space-between;gap:10px;
+  padding:10px 14px;border-radius:999px;
+  background:rgba(0,0,0,.45);
+  border:1px solid rgba(255,255,255,.12);
+  font-weight:1000;margin-bottom:10px;color:#fff;
+}
+#gameCanvas{width:100%;height:auto;display:block;border-radius:18px;background:#87ceeb}
+.controls{margin-top:10px;display:flex;justify-content:center;gap:10px}
+.ctrlBtn{
+  width:74px;height:48px;border:none;border-radius:16px;
+  font-size:18px;font-weight:900;cursor:pointer;
+  box-shadow:0 10px 22px rgba(0,0,0,.25);
+  user-select:none;
+}
+.gameTip{margin-top:8px;text-align:center;opacity:.9;font:700 13px/1.2 system-ui;color:#fff}
+
+/* ====== EMOJI PARTICLES ====== */
+.particle{
+  position:fixed; top:-12vh; z-index:30;
+  font-size:2.2rem;
+  pointer-events:none;
+  filter: drop-shadow(0 12px 14px rgba(0,0,0,.28));
+  will-change: transform, opacity;
+}
+
+/* ====== FINAL ====== */
+#finalOverlay{z-index:40}
+.finalCard{
+  width:min(720px,92vw);
+  padding:26px;
+  border-radius:26px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.25);
+  backdrop-filter: blur(12px);
+  text-align:center;
+  box-shadow:0 20px 70px rgba(0,0,0,.45);
+  animation: popIn .25s ease;
+}
+.closeBtn{
+  margin-top:14px;
+  display:inline-block;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.18);
+  color:#fff;padding:10px 14px;border-radius:999px;
+  cursor:pointer;
+}
+
+/* ====== TRANSITIONS ====== */
+.fadeOut{animation: fadeOut .55s ease forwards}
+@keyframes fadeOut{to{opacity:0; transform:scale(1.01)}}
+
+.shake{animation: shake .45s ease}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-10px)}
+  40%{transform:translateX(10px)}
+  60%{transform:translateX(-8px)}
+  80%{transform:translateX(8px)}
+}
 </style>
 </head>
 
 <body>
-
+<div id="bg"></div>
+<div class="pattern"></div>
 <div id="stars"></div>
-<div class="moon"></div>
+<div class="moon" id="moon"></div>
 
-<!-- MINI GAME -->
-<div id="game" class="center">
-  <div class="box">
-    <h2>🎮 Mini-jeu</h2>
-    <p>Attrape le cœur pour continuer</p>
-    <canvas id="gameCanvas" width="320" height="180"></canvas><br>
-    <button class="btn yes" onclick="startGame()">Commencer</button>
+<!-- =============== MINI GAME =============== -->
+<div id="gameOverlay" class="overlay">
+  <div class="gameShell">
+    <div class="gameHud">
+      <span>⏱️ <b id="t">0.0</b>s</span>
+      <span>💖 <b id="sc">0</b></span>
+      <span>🎯 <b id="need">1</b></span>
+    </div>
+    <canvas id="gameCanvas" width="520" height="240"></canvas>
+    <div class="controls">
+      <button class="ctrlBtn" id="L">◀</button>
+      <button class="ctrlBtn" id="J">▲</button>
+      <button class="ctrlBtn" id="R">▶</button>
+    </div>
+    <div class="gameTip">Attrape le cœur 💖 pour continuer (PC: ← → ↑)</div>
   </div>
 </div>
 
-<!-- VIRUS -->
-<div id="virus" class="center hidden">
-  <div class="box">
-    <h2 class="warn">🦠 SYSTÈME INFECTÉ</h2>
-    <div class="console" id="console"></div>
-    <button class="btn yes" onclick="openAuth()">Ouvrir le dossier VIRUS</button>
-  </div>
-</div>
+<!-- =============== VIRUS =============== -->
+<div id="virusOverlay" class="overlay hidden">
+  <div class="window" id="virusWin">
+    <div class="winTop">
+      <div class="dot red"></div><div class="dot yel"></div><div class="dot grn"></div>
+      <div>Dossier infecté détecté</div>
+    </div>
+    <div class="winBody" id="virusBody">
+      <div class="glitch">⚠️ Système compromis… Scan en cours…</div>
 
-<!-- AUTH -->
-<div id="auth" class="center hidden">
-  <div class="box">
-    <p>
-      Ai-je l’autorisation de <b>Monsieur Razik Joseph</b> et de
-      <b>Madame Sabrina Yang</b> pour avoir votre fille
-      en valentine et si possible à vie ?
-    </p>
-    <button class="btn yes" onclick="goValentine()">OUI ✅</button>
-    <button class="btn no" id="authNo">NON ❌</button>
-  </div>
-</div>
+      <div class="progressWrap">
+        <div class="progressBar"><div class="progressFill" id="prog"></div></div>
+        <div class="pct" id="pct">0%</div>
+      </div>
 
-<!-- VALENTINE -->
-<div id="val" class="center hidden">
-  <div class="box" id="valBox">
-    <h1>Veux-tu être ma Valentine ? 💘</h1>
-    <p>Cath × Momo 💕</p>
-    <div style="position:relative;height:120px">
-      <button class="btn yes" onclick="final()">OUI 💖</button>
-      <button class="btn no" id="noVal">NON 😭</button>
+      <div class="console" id="console"></div>
+
+      <div class="actions">
+        <button class="actionBtn primary" id="openVirusBtn">Ouvrir le dossier VIRUS 🗂️</button>
+      </div>
+      <div class="small">(animation fun — pas un vrai virus 😭)</div>
+    </div>
+
+    <div class="winBody hidden" id="authBody">
+      <h2 style="margin:6px 0 10px">Demande d’autorisation</h2>
+      <div style="opacity:.95;line-height:1.35;margin:0 auto 14px;width:min(760px,96%)">
+        « Ai-je l’autorisation de <b>Monsieur Razik Joseph</b> et de <b>Madame Sabrina Yang</b>
+        pour pouvoir avoir votre fille en valentine et si possible à vie ? »
+      </div>
+      <div class="toast"><span id="authToast">Choisis bien… 😳</span></div>
+
+      <div class="row" id="authZone" style="height:120px">
+        <button class="btn yes" id="authYes" style="left:30%;transform:translateX(-50%)">OUI ✅</button>
+        <button class="btn no"  id="authNo"  style="left:70%;transform:translateX(-50%)">NON ❌</button>
+      </div>
+
+      <div class="small" style="opacity:.9">Le “NON” a tendance à paniquer…</div>
     </div>
   </div>
 </div>
 
-<!-- FINAL -->
-<div id="final" class="center hidden">
-  <div class="box">
-    <h2>🔥 Surprise 🔥</h2>
-    <p>
-      dépêche-toi de me faire un câlin…<br>
-     Promis, je prendrai soin d’elle et je ferai tout pour la rendre heureuse ❤️
+<!-- =============== VALENTINE =============== -->
+<div id="valentineUI" class="ui hidden">
+  <div class="card" id="card">
+    <h1>Veux-tu être ma Valentine ? 💘</h1>
+    <div class="sub">Cath × Momo 💕</div>
+    <div class="toast"><span id="toast">Tu choisis… 😏</span></div>
 
+    <div class="row" id="zone">
+      <button class="btn yes" id="yesBtn" style="left:30%;transform:translateX(-50%)">OUI 💖</button>
+      <button class="btn no"  id="noBtn"  style="left:70%;transform:translateX(-50%)">NON 😭</button>
+    </div>
+
+    <div class="tip">Plus tu dis OUI… plus le ciel se remplit d’étoiles ✨</div>
+  </div>
+</div>
+
+<!-- =============== FINAL =============== -->
+<div id="finalOverlay" class="overlay hidden">
+  <div class="finalCard">
+    <h2 style="margin:0 0 10px">💖 Promesse 💖</h2>
+    <p style="margin:0;font-size:1.15rem;line-height:1.35">
+      Promis, je prendrai soin d’elle et je ferai tout pour la rendre heureuse ❤️
     </p>
+    <div class="closeBtn" id="closeFinal">Fermer</div>
   </div>
 </div>
 
 <script>
-/* ===== STARS ===== */
-const stars=document.getElementById("stars");
-setInterval(()=>{
-  const s=document.createElement("div");
-  s.className="star";
-  s.textContent=Math.random()<.5?"✨":"⭐";
-  s.style.left=Math.random()*100+"vw";
-  s.style.top=Math.random()*100+"vh";
-  stars.appendChild(s);
-  setTimeout(()=>s.remove(),2400);
-},300);
+/* ===============================
+   Helpers (safe / stable)
+================================ */
+const $ = (id) => document.getElementById(id);
 
-/* ===== MINI GAME ===== */
-const cv=document.getElementById("gameCanvas"),ctx=cv.getContext("2d");
-let px=20,py=140,vx=0,vy=0,playing=false;
-const heart={x:260,y:60};
+function show(id){ $(id).classList.remove("hidden"); }
+function hide(id){ $(id).classList.add("hidden"); }
 
-function startGame(){playing=true;loop()}
-function loop(){
-  if(!playing)return;
-  vy+=0.5;px+=vx;py+=vy;
-  if(py>140){py=140;vy=0}
-  ctx.clearRect(0,0,320,180);
-  ctx.fillRect(px,py,14,14);
-  ctx.fillStyle="#ff4d6d";ctx.fillRect(heart.x,heart.y,14,14);
-  if(Math.abs(px-heart.x)<14 && Math.abs(py-heart.y)<14){
-    playing=false;
-    game.classList.add("hidden");
-    virus.classList.remove("hidden");
-    startVirus();
+function popShake(el){
+  el.classList.remove("shake");
+  void el.offsetWidth;
+  el.classList.add("shake");
+}
+
+function rain(emojis, count){
+  for(let i=0;i<count;i++){
+    const p=document.createElement("div");
+    p.className="particle";
+    p.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    p.style.left = (Math.random()*100)+"vw";
+    p.style.opacity = (Math.random()*0.45 + 0.55).toFixed(2);
+    p.style.fontSize = (Math.random()*18 + 30) + "px";
+    document.body.appendChild(p);
+
+    const dur = Math.random()*2200 + 2200;
+    const sx = (Math.random()*40 - 20);
+    const ex = (Math.random()*160 - 80);
+    p.animate([
+      { transform:`translate(${sx}px,0) rotate(0deg)`, opacity:p.style.opacity },
+      { transform:`translate(${ex}px,120vh) rotate(${Math.random()*360}deg)`, opacity:0 }
+    ], { duration: dur, easing:"linear" });
+
+    setTimeout(()=>p.remove(), dur+60);
   }
-  requestAnimationFrame(loop);
 }
-onkeydown=e=>{
-  if(e.key==="ArrowLeft")vx=-2;
-  if(e.key==="ArrowRight")vx=2;
-  if(e.key==="ArrowUp"&&vy===0)vy=-8;
-}
-onkeyup=()=>vx=0;
 
-/* ===== VIRUS ===== */
-const consoleEl=document.getElementById("console");
-const msgs=[
-  "Scanning system files...",
-  "Injecting love.dll",
-  "Bypassing cold_mode.exe",
-  "Compiling feelings...",
-  "Heart protocol ready 💘"
-];
-let i=0;
+function addStars(n){
+  const stars = $("stars");
+  for(let i=0;i<n;i++){
+    const s=document.createElement("div");
+    s.className="star";
+    s.textContent = (Math.random()<0.6) ? "✨" : "⭐";
+    s.style.left = (Math.random()*100)+"vw";
+    s.style.top  = (Math.random()*100)+"vh";
+    s.style.animationDuration = (Math.random()*1.2+1.6)+"s";
+    stars.appendChild(s);
+    setTimeout(()=>s.remove(), 2600);
+  }
+}
+
+/* ===============================
+   Background interactivity
+================================ */
+(() => {
+  const moon = $("moon");
+  let mx=0,my=0;
+  window.addEventListener("mousemove",(e)=>{
+    mx = (e.clientX/innerWidth - .5);
+    my = (e.clientY/innerHeight - .5);
+    moon.style.transform = `translate(${mx*18}px, ${my*18}px)`;
+  }, {passive:true});
+
+  // gentle star ambient
+  setInterval(()=> addStars(3), 650);
+})();
+
+/* ===============================
+   MINI GAME (stable)
+   Goal: catch 1 heart -> virus
+================================ */
+(() => {
+  const overlay = $("gameOverlay");
+  const cv = $("gameCanvas");
+  const ctx = cv.getContext("2d");
+  const W=cv.width, H=cv.height;
+
+  const tEl = $("t");
+  const scEl = $("sc");
+  const needEl = $("need");
+  needEl.textContent = "1";
+
+  const L=$("L"), R=$("R"), J=$("J");
+
+  let start = performance.now();
+  let score = 0;
+
+  const player = {x:30,y:0,w:16,h:16,vx:0,vy:0,onG:false};
+  const g=0.55, move=2.6, jump=-9.0, friction=0.82;
+
+  const ground = {x:0,y:210,w:520,h:30};
+  const plat1  = {x:140,y:165,w:90,h:12};
+  const plat2  = {x:300,y:135,w:90,h:12};
+  const mover  = {x:220,y:190,w:90,h:12,minX:200,maxX:360,v:1.2};
+
+  const heart  = {x:430,y:95,w:14,h:14,t:false};
+
+  const keys={left:false,right:false,up:false};
+  function setKey(k,v){ keys[k]=v; }
+
+  function aabb(a,b){
+    return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y;
+  }
+
+  function bindHold(btn, down, up){
+    const d=(e)=>{e.preventDefault();down();};
+    const u=(e)=>{e.preventDefault();up();};
+    btn.addEventListener("touchstart",d,{passive:false});
+    btn.addEventListener("touchend",u,{passive:false});
+    btn.addEventListener("touchcancel",u,{passive:false});
+    btn.addEventListener("mousedown",d);
+    btn.addEventListener("mouseup",u);
+    btn.addEventListener("mouseleave",u);
+  }
+  bindHold(L, ()=>setKey("left",true), ()=>setKey("left",false));
+  bindHold(R, ()=>setKey("right",true), ()=>setKey("right",false));
+  bindHold(J, ()=>setKey("up",true), ()=>setKey("up",false));
+
+  window.addEventListener("keydown",(e)=>{
+    if(e.key==="ArrowLeft") setKey("left",true);
+    if(e.key==="ArrowRight") setKey("right",true);
+    if(e.key==="ArrowUp") setKey("up",true);
+  });
+  window.addEventListener("keyup",(e)=>{
+    if(e.key==="ArrowLeft") setKey("left",false);
+    if(e.key==="ArrowRight") setKey("right",false);
+    if(e.key==="ArrowUp") setKey("up",false);
+  });
+
+  function reset(){
+    player.x=30;player.y=0;player.vx=0;player.vy=0;
+  }
+
+  function collideTop(p){
+    const falling = player.vy>=0;
+    const wasAbove = (player.y+player.h-player.vy) <= p.y;
+    const nowOver  = (player.y+player.h) >= p.y;
+    const xOverlap = (player.x+player.w)>p.x && player.x<(p.x+p.w);
+    if(falling && wasAbove && nowOver && xOverlap){
+      player.y=p.y-player.h;
+      player.vy=0;
+      player.onG=true;
+      if(p===mover) player.x += mover.v*0.6;
+    }
+  }
+
+  function step(){
+    tEl.textContent = ((performance.now()-start)/1000).toFixed(1);
+
+    mover.x += mover.v;
+    if(mover.x<mover.minX || mover.x>mover.maxX) mover.v *= -1;
+
+    if(keys.left) player.vx=-move;
+    if(keys.right) player.vx=move;
+    if(!keys.left && !keys.right) player.vx*=friction;
+
+    if(keys.up && player.onG){
+      player.vy=jump;
+      player.onG=false;
+    }
+
+    player.vy+=g;
+    player.x+=player.vx;
+    player.y+=player.vy;
+
+    // bounds
+    if(player.x<0) player.x=0;
+    if(player.x+player.w>W) player.x=W-player.w;
+
+    player.onG=false;
+    collideTop(ground);
+    collideTop(plat1);
+    collideTop(plat2);
+    collideTop(mover);
+
+    if(player.y>H+80) reset();
+
+    // collect heart
+    if(!heart.t && aabb(player, heart)){
+      heart.t=true;
+      score=1;
+      scEl.textContent="1";
+      rain(["💖","✨"], 18);
+      overlay.classList.add("fadeOut");
+      setTimeout(()=>{
+        hide("gameOverlay");
+        show("virusOverlay");
+        startVirus();
+      },520);
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    // clouds
+    ctx.globalAlpha=.25; ctx.fillStyle="#fff";
+    ctx.beginPath(); ctx.ellipse(140,55,54,22,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(190,55,34,14,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(380,72,62,26,0,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+
+    // platforms
+    const rect=(p,fill,stroke)=>{
+      ctx.fillStyle=fill; ctx.fillRect(p.x,p.y,p.w,p.h);
+      ctx.strokeStyle=stroke; ctx.lineWidth=2; ctx.strokeRect(p.x+1,p.y+1,p.w-2,p.h-2);
+    };
+    rect(ground,"#6b3f1f","#40210c");
+    rect(plat1,"#7a4a25","#40210c");
+    rect(plat2,"#7a4a25","#40210c");
+    rect(mover,"#2d2f3a","#0b0c10");
+
+    // heart
+    if(!heart.t){
+      ctx.fillStyle="#ff4d6d"; ctx.fillRect(heart.x,heart.y,heart.w,heart.h);
+      ctx.fillStyle="rgba(255,255,255,.85)"; ctx.fillRect(heart.x+5,heart.y+4,4,4);
+    }
+
+    // player
+    ctx.fillStyle="#111"; ctx.fillRect(player.x,player.y,player.w,player.h);
+    ctx.fillStyle="rgba(255,255,255,.35)"; ctx.fillRect(player.x+10,player.y+4,3,3);
+  }
+
+  function loop(){
+    if($("gameOverlay").classList.contains("hidden")) return;
+    step(); draw();
+    requestAnimationFrame(loop);
+  }
+
+  reset();
+  loop();
+})();
+
+/* ===============================
+   VIRUS + AUTH
+================================ */
 function startVirus(){
-  const t=setInterval(()=>{
-    const d=document.createElement("div");
-    d.className="line"+(Math.random()<.3?" warn":"");
-    d.textContent=msgs[i%msgs.length];
-    consoleEl.appendChild(d);
-    consoleEl.scrollTop=consoleEl.scrollHeight;
-    i++;
-    if(i>12)clearInterval(t);
-  },220);
+  const prog = $("prog");
+  const pct  = $("pct");
+  const consoleEl = $("console");
+  const openVirusBtn = $("openVirusBtn");
+  const virusWin = $("virusWin");
+
+  // reset view
+  $("virusBody").classList.remove("hidden");
+  $("authBody").classList.add("hidden");
+
+  consoleEl.innerHTML = "";
+  let p=0;
+
+  const files = [
+    "C:/system32/valentine.dll",
+    "C:/users/cathy/Desktop/Cath×Momo.txt",
+    "D:/snap/flammes🔥/hot_mode.cfg",
+    "C:/temp/heart_payload.bin",
+    "C:/system32/love_protocol.exe"
+  ];
+  const msgs = [
+    "initializing scanner...",
+    "hashing signatures...",
+    "injecting romantic payload...",
+    "bypassing cold mode...",
+    "arming heart.exe...",
+    "warming up feelings...",
+    "compiling butterflies..."
+  ];
+  function pushLine(text, cls="consoleLine"){
+    const div=document.createElement("div");
+    div.className=cls;
+    div.textContent=text;
+    consoleEl.appendChild(div);
+    while(consoleEl.children.length>14) consoleEl.removeChild(consoleEl.firstChild);
+  }
+
+  pushLine("[boot] starting secure scan...", "consoleLine dim");
+
+  const timer = setInterval(()=>{
+    p = Math.min(100, p + (Math.random()*10 + 4));
+    prog.style.width = p.toFixed(0) + "%";
+    pct.textContent = p.toFixed(0) + "%";
+
+    const f = files[Math.floor(Math.random()*files.length)];
+    const m = msgs[Math.floor(Math.random()*msgs.length)];
+    pushLine(`[scan] ${m} -> ${f}`, "consoleLine");
+    if(Math.random()<0.25) pushLine(`[warn] suspicious LOVE signature found 💘`, "consoleLine warn");
+
+    if(p>=100){
+      clearInterval(timer);
+      pct.textContent="100% — Prêt ✅";
+      pushLine("[ok] scan complete — ready ✅", "consoleLine dim");
+      rain(["⚠️","💾","💘"], 14);
+    }
+
+    // small glitch shake sometimes
+    if(Math.random()<0.15){
+      virusWin.style.transform="translateX(-6px)";
+      setTimeout(()=>virusWin.style.transform="translateX(6px)",60);
+      setTimeout(()=>virusWin.style.transform="",120);
+    }
+  }, 220);
+
+  openVirusBtn.onclick = ()=>{
+    // transition to auth inside same window
+    rain(["🗂️","💾","⚠️","💘"], 22);
+    $("virusBody").classList.add("hidden");
+    $("authBody").classList.remove("hidden");
+    setupAuth();
+  };
 }
 
-/* ===== AUTH ===== */
-const authNo=document.getElementById("authNo");
-authNo.onmouseenter=()=>{
-  authNo.style.left=Math.random()*60+20+"%";
-  authNo.style.top=Math.random()*60+20+"%";
-}
-function openAuth(){
-  virus.classList.add("hidden");
-  auth.classList.remove("hidden");
+function setupAuth(){
+  const authYes = $("authYes");
+  const authNo  = $("authNo");
+  const authToast = $("authToast");
+  const authZone = $("authZone");
+
+  const hoverPhrases = [
+    "Tu es sûr ? 😳",
+    "Attends… réfléchis 😭",
+    "C’est une belle demande quand même 🥺",
+    "On peut pas refuser ça 💔",
+    "Dernière chance… 😤"
+  ];
+  const clickPhrases = [
+    "Aïe… 💔",
+    "Non non… re-choisis 😭",
+    "Tu veux vraiment dire NON ? 😳",
+    "Ok… mais ça fait mal 🥲",
+    "Allez… OUI 😤"
+  ];
+  let h=0,c=0;
+
+  function setNoPos(leftPx, topPx){
+    const z=authZone.getBoundingClientRect();
+    const b=authNo.getBoundingClientRect();
+    const bw=b.width, bh=b.height;
+    const x=Math.max(10, Math.min(leftPx, z.width-bw-10));
+    const y=Math.max(10, Math.min(topPx,  z.height-bh-10));
+    authNo.style.left=(x + bw/2)+"px";
+    authNo.style.top=y+"px";
+    authNo.style.transform="translateX(-50%)";
+  }
+
+  authNo.onmouseenter=()=>{
+    authToast.textContent = hoverPhrases[h++%hoverPhrases.length];
+    rain(["😳","🫣","🥺"], 10);
+    const z=authZone.getBoundingClientRect();
+    setNoPos(Math.random()*(z.width*0.50)+z.width*0.40, 32 + Math.random()*20);
+  };
+  authNo.onclick=()=>{
+    authToast.textContent = clickPhrases[c++%clickPhrases.length];
+    rain(["💔","😭","🥲","😤"], 28);
+    const z=authZone.getBoundingClientRect();
+    setNoPos(Math.random()*(z.width*0.55)+z.width*0.35, 32);
+  };
+
+  authYes.onclick=()=>{
+    rain(["✨","⭐","💖","💘","🌙"], 80);
+    $("virusOverlay").classList.add("fadeOut");
+    setTimeout(()=>{
+      hide("virusOverlay");
+      show("valentineUI");
+      initValentine();
+    },520);
+  };
 }
 
-/* ===== VALENTINE ===== */
-const noVal=document.getElementById("noVal");
-noVal.onmouseenter=()=>{
-  noVal.style.left=Math.random()*60+20+"%";
-  noVal.style.top=Math.random()*60+20+"%";
-  valBox.classList.add("glitch");
-  setTimeout(()=>valBox.classList.remove("glitch"),300);
+/* ===============================
+   VALENTINE (main interactions)
+================================ */
+function initValentine(){
+  const moon = $("moon");
+  const toast = $("toast");
+  const yesBtn = $("yesBtn");
+  const noBtn  = $("noBtn");
+  const zone   = $("zone");
+  const card   = $("card");
+
+  // start vibe
+  addStars(18);
+  toast.textContent = "Autorisation validée ✅ Maintenant… la vraie question 😏";
+
+  // NO behavior
+  const noHoverPhrases = [
+    "T’es sûre de toi ? 😳",
+    "Attends… réfléchis 😭",
+    "Tu rigoles pas là ? 🫣",
+    "Vraiment NON ? 💔",
+    "Dernière chance… 😤"
+  ];
+  const noClickPhrases = [
+    "Aïe… 💔",
+    "Cathy stp… 🥺",
+    "Non non non… re-choisis 😤",
+    "Tu me fais mal 😭",
+    "Ok… mais je boude 😤"
+  ];
+  let nh=0,nc=0;
+
+  function setNoPos(leftPx, topPx){
+    const z=zone.getBoundingClientRect();
+    const b=noBtn.getBoundingClientRect();
+    const bw=b.width, bh=b.height;
+    const x=Math.max(10, Math.min(leftPx, z.width-bw-10));
+    const y=Math.max(10, Math.min(topPx,  z.height-bh-10));
+    noBtn.style.left=(x + bw/2)+"px";
+    noBtn.style.top=y+"px";
+    noBtn.style.transform="translateX(-50%)";
+  }
+  function nudgeNoAway(mouseX, mouseY){
+    const z=zone.getBoundingClientRect();
+    const b=noBtn.getBoundingClientRect();
+    const nbx=(b.left+b.width/2)-z.left;
+    const nby=(b.top+b.height/2)-z.top;
+    const dx=mouseX-nbx, dy=mouseY-nby;
+    const dist=Math.hypot(dx,dy);
+    if(dist<120){
+      const push=150;
+      const px=nbx-(dx/(dist||1))*push;
+      const py=nby-(dy/(dist||1))*(push*0.28);
+      setNoPos(px-b.width/2, py-18);
+    }
+  }
+  zone.addEventListener("mousemove",(e)=>{
+    const z=zone.getBoundingClientRect();
+    nudgeNoAway(e.clientX-z.left, e.clientY-z.top);
+  },{passive:true});
+
+  noBtn.onmouseenter=()=>{
+    toast.textContent = noHoverPhrases[nh++%noHoverPhrases.length];
+    const z=zone.getBoundingClientRect();
+    setNoPos(z.width*0.62 + Math.random()*50, 32 + Math.random()*18);
+  };
+  noBtn.onclick=()=>{
+    toast.textContent = noClickPhrases[nc++%noClickPhrases.length];
+    popShake(card);
+    rain(["💔","😭","🥲","😤","🫠"], 44);
+    const z=zone.getBoundingClientRect();
+    setNoPos(Math.random()*(z.width*0.55)+z.width*0.35, 32);
+  };
+
+  // YES hesitation steps + more stars
+  const yesSteps = [
+    "T’es sûre ? 😳",
+    "Genre OUI OUI ? 💘",
+    "Après ça c’est sérieux 😏",
+    "Dernière confirmation… 💍",
+    "OK… officiel 😍"
+  ];
+  let yesCount=0;
+
+  yesBtn.onclick=()=>{
+    yesCount++;
+    toast.textContent = yesSteps[Math.min(yesCount-1, yesSteps.length-1)];
+    addStars(12 + yesCount*10);
+    rain(["✨","💖","💘","⭐"], 18 + yesCount*7);
+
+    moon.classList.add("glow");
+    setTimeout(()=>moon.classList.remove("glow"), 520);
+
+    yesBtn.style.transform="translateX(-50%) scale(1.06)";
+    setTimeout(()=> yesBtn.style.transform="translateX(-50%)", 140);
+
+    if(yesCount >= 5){
+      showFinal();
+    }
+  };
 }
-function goValentine(){
-  auth.classList.add("hidden");
-  val.classList.remove("hidden");
+
+/* ===============================
+   FINAL (no naming conflict!)
+================================ */
+const finalOverlay = $("finalOverlay");
+function showFinal(){
+  show("finalOverlay");
+  addStars(90);
+  rain(["⭐","✨","💖","💘","🌙"], 140);
 }
-function final(){
-  val.classList.add("hidden");
-  final.classList.remove("hidden");
-}
+$("closeFinal").onclick=()=> hide("finalOverlay");
+finalOverlay.addEventListener("click",(e)=>{
+  if(e.target === finalOverlay) hide("finalOverlay");
+});
+
+/* ===============================
+   HARD SAFETY: enforce initial state
+================================ */
+(function enforceStart(){
+  // show ONLY game at first load
+  hide("virusOverlay");
+  hide("valentineUI");
+  hide("finalOverlay");
+  show("gameOverlay");
+})();
 </script>
 
 </body>
 </html>
-
