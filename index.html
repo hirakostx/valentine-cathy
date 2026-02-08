@@ -4,57 +4,119 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cath × Momo 💘</title>
+
 <style>
-html,body{margin:0;height:100%;overflow:hidden;font-family:system-ui;background:#111;color:#fff}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;font-family:system-ui;background:#05060a;color:#fff}
 button{font:inherit;cursor:pointer}
-.center{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-.box{background:#1e1e1e;padding:20px;border-radius:16px;text-align:center;width:90%;max-width:520px}
-.btn{padding:12px 18px;border:none;border-radius:999px;margin:6px;font-weight:700}
-.yes{background:#ff2e63;color:#fff}
-.no{background:#333;color:#fff;position:absolute}
+
 .hidden{display:none}
+.center{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+
+/* ===== GLOBAL FX ===== */
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes glitch{0%,100%{transform:none}20%{transform:translateX(-2px)}40%{transform:translateX(2px)}60%{transform:translateX(-1px)}}
+@keyframes float{50%{transform:translateY(-18px)}}
+
+/* ===== STARS ===== */
+#stars{position:fixed;inset:0;pointer-events:none}
+.star{position:absolute;font-size:18px;animation:tw 2.4s ease-in-out infinite}
+@keyframes tw{0%{opacity:0}50%{opacity:.9}100%{opacity:0}}
+
+/* ===== MOON ===== */
+.moon{
+  position:fixed;top:10%;right:8%;
+  width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,#fff,#d0d0d0 60%,#aaa);
+  box-shadow:0 0 50px rgba(255,255,255,.4);
+  animation:float 6s ease-in-out infinite;
+}
+
+/* ===== BOX ===== */
+.box{
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:22px;
+  padding:22px;
+  width:min(720px,92vw);
+  text-align:center;
+  animation:pop .4s ease;
+  backdrop-filter:blur(10px);
+}
+
+/* ===== BUTTONS ===== */
+.btn{padding:12px 20px;border:none;border-radius:999px;margin:8px;font-weight:800}
+.yes{background:#ff2e63;color:#fff}
+.no{background:#222;color:#fff;position:absolute}
+
+/* ===== VIRUS ===== */
+.console{
+  background:#000;
+  border-radius:14px;
+  padding:12px;
+  height:160px;
+  overflow:hidden;
+  text-align:left;
+  font:12px monospace;
+  margin:12px 0;
+}
+.line{opacity:.85}
+.warn{color:#ff7b9c}
+
+/* ===== MINI GAME ===== */
+#gameCanvas{background:#87ceeb;border-radius:16px}
+
+/* ===== FINAL ===== */
+#final p{font-size:1.2rem}
 </style>
 </head>
+
 <body>
 
-<!-- MINI GAME SIMPLE -->
+<div id="stars"></div>
+<div class="moon"></div>
+
+<!-- MINI GAME -->
 <div id="game" class="center">
   <div class="box">
     <h2>🎮 Mini-jeu</h2>
-    <p>Clique pour commencer</p>
-    <button class="btn yes" onclick="startVirus()">Jouer</button>
+    <p>Attrape le cœur pour continuer</p>
+    <canvas id="gameCanvas" width="320" height="180"></canvas><br>
+    <button class="btn yes" onclick="startGame()">Commencer</button>
   </div>
 </div>
 
 <!-- VIRUS -->
 <div id="virus" class="center hidden">
   <div class="box">
-    <h2>🦠 Dossier infecté détecté</h2>
-    <p>Clique pour ouvrir le dossier VIRUS</p>
-    <button class="btn yes" onclick="askAuth()">Ouvrir</button>
+    <h2 class="warn">🦠 SYSTÈME INFECTÉ</h2>
+    <div class="console" id="console"></div>
+    <button class="btn yes" onclick="openAuth()">Ouvrir le dossier VIRUS</button>
   </div>
 </div>
 
-<!-- AUTORISATION -->
+<!-- AUTH -->
 <div id="auth" class="center hidden">
   <div class="box">
     <p>
       Ai-je l’autorisation de <b>Monsieur Razik Joseph</b> et de
-      <b>Madame Sabrina Yang</b> pour avoir votre fille en valentine
-      et si possible à vie ?
+      <b>Madame Sabrina Yang</b> pour avoir votre fille
+      en valentine et si possible à vie ?
     </p>
-    <button class="btn yes" onclick="showValentine()">OUI</button>
-    <button class="btn no" id="noBtn">NON</button>
+    <button class="btn yes" onclick="goValentine()">OUI ✅</button>
+    <button class="btn no" id="authNo">NON ❌</button>
   </div>
 </div>
 
 <!-- VALENTINE -->
 <div id="val" class="center hidden">
-  <div class="box">
+  <div class="box" id="valBox">
     <h1>Veux-tu être ma Valentine ? 💘</h1>
     <p>Cath × Momo 💕</p>
-    <button class="btn yes" onclick="final()">OUI 💖</button>
-    <button class="btn no" id="noBtn2">NON 😭</button>
+    <div style="position:relative;height:120px">
+      <button class="btn yes" onclick="final()">OUI 💖</button>
+      <button class="btn no" id="noVal">NON 😭</button>
+    </div>
   </div>
 </div>
 
@@ -62,38 +124,102 @@ button{font:inherit;cursor:pointer}
 <div id="final" class="center hidden">
   <div class="box">
     <h2>🔥 Surprise 🔥</h2>
-    <p>dépêche-toi de me faire un câlin…<br>
-    ça va chauffer toi et moi plus que tes flammes snap 🔥😏</p>
+    <p>
+      dépêche-toi de me faire un câlin…<br>
+      ça va chauffer toi et moi plus que tes flammes snap 🔥😏
+    </p>
   </div>
 </div>
 
 <script>
-const no1=document.getElementById("noBtn");
-const no2=document.getElementById("noBtn2");
+/* ===== STARS ===== */
+const stars=document.getElementById("stars");
+setInterval(()=>{
+  const s=document.createElement("div");
+  s.className="star";
+  s.textContent=Math.random()<.5?"✨":"⭐";
+  s.style.left=Math.random()*100+"vw";
+  s.style.top=Math.random()*100+"vh";
+  stars.appendChild(s);
+  setTimeout(()=>s.remove(),2400);
+},300);
 
-function dodge(btn){
-  btn.onmouseenter=()=>{
-    btn.style.left=Math.random()*60+20+"%";
-    btn.style.top=Math.random()*60+20+"%";
-  };
+/* ===== MINI GAME ===== */
+const cv=document.getElementById("gameCanvas"),ctx=cv.getContext("2d");
+let px=20,py=140,vx=0,vy=0,playing=false;
+const heart={x:260,y:60};
+
+function startGame(){playing=true;loop()}
+function loop(){
+  if(!playing)return;
+  vy+=0.5;px+=vx;py+=vy;
+  if(py>140){py=140;vy=0}
+  ctx.clearRect(0,0,320,180);
+  ctx.fillRect(px,py,14,14);
+  ctx.fillStyle="#ff4d6d";ctx.fillRect(heart.x,heart.y,14,14);
+  if(Math.abs(px-heart.x)<14 && Math.abs(py-heart.y)<14){
+    playing=false;
+    game.classList.add("hidden");
+    virus.classList.remove("hidden");
+    startVirus();
+  }
+  requestAnimationFrame(loop);
 }
-dodge(no1); dodge(no2);
+onkeydown=e=>{
+  if(e.key==="ArrowLeft")vx=-2;
+  if(e.key==="ArrowRight")vx=2;
+  if(e.key==="ArrowUp"&&vy===0)vy=-8;
+}
+onkeyup=()=>vx=0;
 
+/* ===== VIRUS ===== */
+const consoleEl=document.getElementById("console");
+const msgs=[
+  "Scanning system files...",
+  "Injecting love.dll",
+  "Bypassing cold_mode.exe",
+  "Compiling feelings...",
+  "Heart protocol ready 💘"
+];
+let i=0;
 function startVirus(){
-  game.classList.add("hidden");
-  virus.classList.remove("hidden");
+  const t=setInterval(()=>{
+    const d=document.createElement("div");
+    d.className="line"+(Math.random()<.3?" warn":"");
+    d.textContent=msgs[i%msgs.length];
+    consoleEl.appendChild(d);
+    consoleEl.scrollTop=consoleEl.scrollHeight;
+    i++;
+    if(i>12)clearInterval(t);
+  },220);
 }
-function askAuth(){
+
+/* ===== AUTH ===== */
+const authNo=document.getElementById("authNo");
+authNo.onmouseenter=()=>{
+  authNo.style.left=Math.random()*60+20+"%";
+  authNo.style.top=Math.random()*60+20+"%";
+}
+function openAuth(){
   virus.classList.add("hidden");
   auth.classList.remove("hidden");
 }
-function showValentine(){
+
+/* ===== VALENTINE ===== */
+const noVal=document.getElementById("noVal");
+noVal.onmouseenter=()=>{
+  noVal.style.left=Math.random()*60+20+"%";
+  noVal.style.top=Math.random()*60+20+"%";
+  valBox.classList.add("glitch");
+  setTimeout(()=>valBox.classList.remove("glitch"),300);
+}
+function goValentine(){
   auth.classList.add("hidden");
   val.classList.remove("hidden");
 }
 function final(){
   val.classList.add("hidden");
-  document.getElementById("final").classList.remove("hidden");
+  final.classList.remove("hidden");
 }
 </script>
 
