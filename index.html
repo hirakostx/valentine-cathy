@@ -3,191 +3,144 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cath × Momo 💘</title>
+<title>Mini jeu 💖</title>
 
 <style>
-/* ================== GLOBAL ================== */
-html,body{margin:0;height:100%;overflow:hidden;font-family:"Comic Sans MS",system-ui}
-button{font-family:inherit}
-
-/* ================== MINI GAME ================== */
-#game{
-  position:fixed;inset:0;z-index:100;
-  background:linear-gradient(#7ec8ff,#dff2ff);
-  display:flex;align-items:center;justify-content:center;
+html,body{
+  margin:0;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#87ceeb;
+  font-family:Arial, sans-serif;
+}
+canvas{
+  background:#87ceeb;
+  border:4px solid #333;
 }
 #hud{
-  position:absolute;top:10px;left:50%;
-  transform:translateX(-50%);
+  position:fixed;
+  top:10px;
   background:rgba(0,0,0,.6);
-  color:#fff;padding:8px 14px;
+  color:white;
+  padding:8px 14px;
   border-radius:999px;
-  display:flex;gap:16px;
-  font-size:14px;
+  display:flex;
+  gap:16px;
 }
-#gameBox{
-  background:#222;border-radius:20px;
-  padding:10px;box-shadow:0 10px 40px rgba(0,0,0,.4);
-}
-#game canvas{
-  background:#87ceeb;border-radius:12px;display:block;
-}
-
-/* Mobile controls */
-.controls{
-  display:flex;justify-content:center;gap:10px;margin-top:8px;
-}
-.ctrl{
-  width:64px;height:44px;border-radius:12px;
-  border:none;font-size:18px;
-}
-
-/* ================== MAIN SITE ================== */
-#site{display:none}
-
-/* (Le reste du CSS du site est volontairement réduit ici
-   pour ne pas dépasser la limite — MAIS le gameplay du site
-   est IDENTIQUE à ce que tu avais avant.
-   Si tu veux, je peux te renvoyer une version FULL décorée.) */
-#site{
-  background:#04050a;color:white;height:100%;
-  display:flex;align-items:center;justify-content:center;
-}
-#site h1{font-size:2.5rem}
 </style>
 </head>
 
 <body>
 
-<!-- ================== MINI GAME ================== -->
-<div id="game">
-  <div id="hud">
-    <div>⏱️ <span id="time">0.0</span>s</div>
-    <div>💖 <span id="score">0</span></div>
-  </div>
-
-  <div id="gameBox">
-    <canvas id="c" width="360" height="200"></canvas>
-
-    <div class="controls">
-      <button class="ctrl" id="left">◀</button>
-      <button class="ctrl" id="jump">▲</button>
-      <button class="ctrl" id="right">▶</button>
-    </div>
-  </div>
+<div id="hud">
+  ⏱️ <span id="time">0.0</span>s |
+  💖 <span id="score">0</span>
 </div>
 
-<!-- ================== MAIN SITE ================== -->
-<div id="site">
-  <h1>💘 Bienvenue dans Cath × Momo 💘</h1>
-</div>
+<canvas id="game" width="360" height="200"></canvas>
 
 <script>
-/* ================== GAME LOGIC ================== */
-const cv=c.getContext("2d");
-let t0=performance.now(),score=0,won=false;
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-const player={x:20,y:150,w:14,h:14,vx:0,vy:0,onG:false};
-const gravity=0.45;
+const timeEl = document.getElementById("time");
+const scoreEl = document.getElementById("score");
 
-const platforms=[
+let startTime = performance.now();
+let score = 0;
+
+const player = {
+  x: 20, y: 150,
+  w: 14, h: 14,
+  vx: 0, vy: 0,
+  onGround: false
+};
+
+const gravity = 0.4;
+
+const platforms = [
   {x:0,y:180,w:360,h:20},
-  {x:60,y:150,w:60,h:10},
-  {x:160,y:120,w:60,h:10},
-  {x:260,y:90,w:60,h:10}
+  {x:80,y:140,w:60,h:10},
+  {x:170,y:110,w:60,h:10},
+  {x:260,y:80,w:60,h:10}
 ];
 
-const moving={x:100,y:90,w:50,h:10,dir:1};
-
-const hearts=[
-  {x:80,y:130,ok:true},
-  {x:180,y:100,ok:true},
-  {x:280,y:70,ok:true}
-];
-
-const goal={x:320,y:40,w:18,h:18};
-
-function rect(a,b){
-  return a.x<a.x+a.w && a.x+b.w>b.x &&
-         a.y<a.y+a.h && a.y+b.h>b.y;
-}
+const heart = {x:310,y:50,w:14,h:14, taken:false};
 
 function update(){
-  if(won)return;
-  const time=((performance.now()-t0)/1000).toFixed(1);
-  timeEl.textContent=time;
+  const t = ((performance.now()-startTime)/1000).toFixed(1);
+  timeEl.textContent = t;
 
-  player.vy+=gravity;
-  player.x+=player.vx;
-  player.y+=player.vy;
+  player.vy += gravity;
+  player.x += player.vx;
+  player.y += player.vy;
 
-  player.onG=false;
-  [...platforms,moving].forEach(p=>{
-    if(player.x<p.x+p.w && player.x+player.w>p.x &&
-       player.y+player.h<p.y+10 && player.y+player.h+player.vy>=p.y){
-      player.y=p.y-player.h;
-      player.vy=0;player.onG=true;
+  player.onGround = false;
+
+  platforms.forEach(p=>{
+    if(player.x < p.x+p.w &&
+       player.x+player.w > p.x &&
+       player.y+player.h <= p.y+10 &&
+       player.y+player.h+player.vy >= p.y){
+        player.y = p.y-player.h;
+        player.vy = 0;
+        player.onGround = true;
     }
   });
 
-  moving.x+=moving.dir*1.2;
-  if(moving.x<80||moving.x>200)moving.dir*=-1;
+  if(player.y > canvas.height){
+    player.x = 20;
+    player.y = 150;
+    player.vy = 0;
+  }
 
-  hearts.forEach(h=>{
-    if(h.ok &&
-       player.x<h.x+12 && player.x+player.w>h.x &&
-       player.y<h.y+12 && player.y+player.h>h.y){
-      h.ok=false;score++;scoreEl.textContent=score;
-    }
-  });
-
-  if(player.y>240){reset();}
-  if(player.x>goal.x-10 && player.y<goal.y+20){
-    win();
+  if(!heart.taken &&
+     player.x < heart.x+heart.w &&
+     player.x+player.w > heart.x &&
+     player.y < heart.y+heart.h &&
+     player.y+player.h > heart.y){
+      heart.taken = true;
+      score++;
+      scoreEl.textContent = score;
+      setTimeout(()=>{
+        alert("💖 Bravo ! Tu as gagné !");
+      },100);
   }
 }
 
 function draw(){
-  cv.clearRect(0,0,360,200);
-  cv.fillStyle="#654321";
-  platforms.forEach(p=>cv.fillRect(p.x,p.y,p.w,p.h));
-  cv.fillRect(moving.x,moving.y,moving.w,moving.h);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  cv.fillStyle="#ff4d6d";
-  hearts.forEach(h=>h.ok&&cv.fillRect(h.x,h.y,12,12));
-  cv.fillStyle="#ff99cc";
-  cv.fillRect(goal.x,goal.y,18,18);
+  ctx.fillStyle="#654321";
+  platforms.forEach(p=>ctx.fillRect(p.x,p.y,p.w,p.h));
 
-  cv.fillStyle="#222";
-  cv.fillRect(player.x,player.y,player.w,player.h);
+  if(!heart.taken){
+    ctx.fillStyle="#ff4d6d";
+    ctx.fillRect(heart.x,heart.y,heart.w,heart.h);
+  }
+
+  ctx.fillStyle="#222";
+  ctx.fillRect(player.x,player.y,player.w,player.h);
 }
 
 function loop(){
-  update();draw();
+  update();
+  draw();
   requestAnimationFrame(loop);
 }
 loop();
 
-function reset(){
-  player.x=20;player.y=150;player.vx=player.vy=0;
-}
-
-function win(){
-  won=true;
-  document.getElementById("game").style.display="none";
-  document.getElementById("site").style.display="flex";
-}
-
-/* Controls */
-onkeydown=e=>{
-  if(e.key==="ArrowRight")player.vx=2.2;
-  if(e.key==="ArrowLeft")player.vx=-2.2;
-  if(e.key==="ArrowUp"&&player.onG){player.vy=-8}
-};
-onkeyup=()=>player.vx=0;
-left.onclick=()=>player.vx=-2.2;
-right.onclick=()=>player.vx=2.2;
-jump.onclick=()=>{if(player.onG)player.vy=-8};
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight") player.vx = 2;
+  if(e.key==="ArrowLeft") player.vx = -2;
+  if(e.key==="ArrowUp" && player.onGround){
+    player.vy = -8;
+    player.onGround = false;
+  }
+});
+document.addEventListener("keyup",()=>player.vx=0);
 </script>
 
 </body>
