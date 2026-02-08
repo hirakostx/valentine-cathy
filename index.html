@@ -287,7 +287,7 @@ h1{margin:4px 0 10px; font-size: clamp(1.9rem, 4vw, 3rem); text-shadow:0 16px 34
 /* ===== FINAL ===== */
 #finalOverlay{z-index:40}
 .finalCard{
-  width:min(720px,92vw);
+  width:min(780px,92vw);
   padding:26px;
   border-radius:26px;
   background:rgba(255,255,255,.12);
@@ -309,6 +309,51 @@ h1{margin:4px 0 10px; font-size: clamp(1.9rem, 4vw, 3rem); text-shadow:0 16px 34
 /* ===== TSUKI ===== */
 #tsukiOverlay{z-index:45}
 #loveOverlay{z-index:46}
+
+/* ===== SAD NOTE ===== */
+#noteOverlay{z-index:47}
+.noteCard{
+  width:min(900px,92vw);
+  padding:26px 22px;
+  border-radius:26px;
+  background:rgba(10,12,18,.86);
+  border:1px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(14px);
+  box-shadow:0 22px 90px rgba(0,0,0,.62);
+  text-align:center;
+}
+.noteTitle{
+  font-weight:1000;
+  letter-spacing:.4px;
+  opacity:.95;
+  margin:0 0 10px;
+}
+.noteText{
+  text-align:left;
+  white-space:pre-wrap;
+  line-height:1.5;
+  font-size:1.02rem;
+  opacity:.92;
+  max-height:min(62vh,560px);
+  overflow:auto;
+  padding:14px 14px;
+  border-radius:18px;
+  background:rgba(0,0,0,.28);
+  border:1px solid rgba(255,255,255,.12);
+}
+.caret{
+  display:inline-block;
+  width:10px;
+  margin-left:2px;
+  opacity:.8;
+  animation: blink 1s steps(2,end) infinite;
+}
+@keyframes blink{50%{opacity:0}}
+.rainCanvas{
+  position:fixed; inset:0; z-index:46;
+  pointer-events:none;
+  opacity:.55;
+}
 
 /* ===== TRANSITIONS ===== */
 .fadeOut{animation: fadeOut .55s ease forwards}
@@ -456,13 +501,26 @@ h1{margin:4px 0 10px; font-size: clamp(1.9rem, 4vw, 3rem); text-shadow:0 16px 34
     <p style="margin:0;font-size:1.25rem;line-height:1.35">
       Je t’aime Cath ❤️
     </p>
+    <div class="closeBtn" id="openNote">Lire la note…</div>
     <div class="closeBtn" id="closeLove">Fermer</div>
+  </div>
+</div>
+
+<!-- ========= SAD NOTE ========= -->
+<canvas id="rain" class="rainCanvas hidden"></canvas>
+<div id="noteOverlay" class="overlay hidden">
+  <div class="noteCard">
+    <div class="noteTitle">🌧️ Une note…</div>
+    <div class="noteText" id="noteText"></div>
+    <div class="actions" style="margin-top:12px">
+      <button class="actionBtn primary" id="closeNote">Fermer</button>
+    </div>
   </div>
 </div>
 
 <script>
 /* ===============================
-   Helpers (safe / stable)
+   Helpers
 ================================ */
 const $ = (id) => document.getElementById(id);
 function show(id){ $(id).classList.remove("hidden"); }
@@ -474,14 +532,11 @@ function popShake(el){
   el.classList.add("shake");
 }
 
-// Vibrations (mobile): certains navigateurs limitent
 function vibe(pattern){
-  try{
-    if(navigator.vibrate) navigator.vibrate(pattern);
-  }catch(e){}
+  try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){}
 }
 
-function rain(emojis, count){
+function rainEmoji(emojis, count){
   for(let i=0;i<count;i++){
     const p=document.createElement("div");
     p.className="particle";
@@ -531,9 +586,7 @@ function addStars(n){
 })();
 
 /* ===============================
-   MINI GAME (long)
-   - Collect 3 hearts
-   - Then TSUKI big heart appears
+   MINI GAME (3 hearts + TSUKI heart)
 ================================ */
 (() => {
   const overlay = $("gameOverlay");
@@ -552,7 +605,6 @@ function addStars(n){
   const player = {x:30,y:0,w:16,h:16,vx:0,vy:0,onG:false};
   const g=0.62, move=2.9, jump=-10.4, friction=0.82;
 
-  // world size
   const worldW = 2400;
 
   const ground = {x:0,y:235,w:worldW,h:30};
@@ -575,10 +627,10 @@ function addStars(n){
     {x:230,y:170,w:14,h:14,t:false},
     {x:450,y:140,w:14,h:14,t:false},
     {x:980,y:130,w:14,h:14,t:false},
-    {x:1550,y:135,w:14,h:14,t:false}, // bonus
+    {x:1550,y:135,w:14,h:14,t:false},
   ];
 
-  const goal = {x:2210,y:165,w:24,h:24,active:false}; // TSUKI big heart
+  const goal = {x:2210,y:165,w:24,h:24,active:false};
 
   let camX = 0;
 
@@ -666,7 +718,6 @@ function addStars(n){
 
     if(player.y>H+140){ vibe([60,40,60]); reset(); }
 
-    // collect hearts
     for(const h of hearts){
       if(h.t) continue;
       if(aabb(player.x,player.y,player.w,player.h, h.x,h.y,h.w,h.h)){
@@ -674,14 +725,14 @@ function addStars(n){
         score++;
         scEl.textContent = String(score);
         vibe(30);
-        rain(["💖","✨"], 12);
+        rainEmoji(["💖","✨"], 12);
       }
     }
 
     goal.active = score>=3;
 
     if(goal.active && aabb(player.x,player.y,player.w,player.h, goal.x,goal.y,goal.w,goal.h)){
-      rain(["💘","TSUKI","✨","⭐"], 28);
+      rainEmoji(["💘","✨","⭐"], 28);
       vibe([40,30,40,30,70]);
       overlay.classList.add("fadeOut");
       setTimeout(()=>{
@@ -691,7 +742,6 @@ function addStars(n){
       },520);
     }
 
-    // camera
     const target = player.x - W*0.45;
     camX += (target - camX)*0.08;
     camX = Math.max(0, Math.min(camX, worldW - W));
@@ -700,7 +750,6 @@ function addStars(n){
   function draw(){
     ctx.clearRect(0,0,W,H);
 
-    // clouds parallax
     ctx.globalAlpha=0.25; ctx.fillStyle="#fff";
     const cx = -(camX*0.18);
     ctx.beginPath(); ctx.ellipse(cx+180, 54, 62, 22, 0, 0, Math.PI*2); ctx.fill();
@@ -718,7 +767,6 @@ function addStars(n){
     for(const p of plats) rect(p,"#7a4a25","#40210c");
     for(const m of movers) rect(m,"#2d2f3a","#0b0c10");
 
-    // hearts
     for(const h of hearts){
       if(h.t) continue;
       const sx = h.x - camX;
@@ -726,7 +774,6 @@ function addStars(n){
       ctx.fillStyle="rgba(255,255,255,.85)"; ctx.fillRect(sx+5,h.y+4,4,4);
     }
 
-    // TSUKI goal
     if(goal.active){
       const gx = goal.x - camX;
       ctx.fillStyle="#ff2e63"; ctx.fillRect(gx,goal.y,goal.w,goal.h);
@@ -740,7 +787,6 @@ function addStars(n){
       ctx.fillText(`Encore ${Math.max(0,3-score)} 💖`, W-150, 22);
     }
 
-    // player
     const px = player.x - camX;
     ctx.fillStyle="#111"; ctx.fillRect(px,player.y,player.w,player.h);
     ctx.fillStyle="rgba(255,255,255,.35)"; ctx.fillRect(px+10,player.y+4,3,3);
@@ -757,7 +803,7 @@ function addStars(n){
 })();
 
 /* ===============================
-   VIRUS (more realistic, still fake)
+   VIRUS
 ================================ */
 function startVirus(){
   const prog = $("prog");
@@ -861,13 +907,13 @@ function startVirus(){
       clearInterval(timer);
       pct.textContent="100% — PRÊT ✅";
       pushLine("[ok] incident contained — awaiting operator action", "consoleLine ok");
-      rain(["⚠️","💾","💘"], 16);
+      rainEmoji(["⚠️","💾","💘"], 16);
       vibe([40,25,40]);
     }
   }, 220);
 
   $("openVirusBtn").onclick = ()=>{
-    rain(["🗂️","💾","⚠️","💘"], 22);
+    rainEmoji(["🗂️","💾","⚠️","💘"], 22);
     vibe([30,20,30]);
     $("virusBody").classList.add("hidden");
     $("authBody").classList.remove("hidden");
@@ -913,21 +959,21 @@ function setupAuth(){
 
   authNo.onmouseenter=()=>{
     authToast.textContent = hoverPhrases[h++%hoverPhrases.length];
-    rain(["😳","🫣","🥺"], 10);
+    rainEmoji(["😳","🫣","🥺"], 10);
     vibe(15);
     const z=authZone.getBoundingClientRect();
     setNoPos(Math.random()*(z.width*0.50)+z.width*0.40, 32 + Math.random()*20);
   };
   authNo.onclick=()=>{
     authToast.textContent = clickPhrases[c++%clickPhrases.length];
-    rain(["💔","😭","🥲","😤"], 28);
+    rainEmoji(["💔","😭","🥲","😤"], 28);
     vibe([30,20,30]);
     const z=authZone.getBoundingClientRect();
     setNoPos(Math.random()*(z.width*0.55)+z.width*0.35, 32);
   };
 
   authYes.onclick=()=>{
-    rain(["✨","⭐","💖","💘","🌙"], 80);
+    rainEmoji(["✨","⭐","💖","💘","🌙"], 80);
     vibe([40,20,40,20,70]);
     $("virusOverlay").classList.add("fadeOut");
     setTimeout(()=>{
@@ -1006,7 +1052,7 @@ function initValentine(){
   noBtn.onclick=()=>{
     toast.textContent = noClickPhrases[nc++%noClickPhrases.length];
     popShake(card);
-    rain(["💔","😭","🥲","😤","🫠"], 44);
+    rainEmoji(["💔","😭","🥲","😤","🫠"], 44);
     vibe([35,25,35]);
     const z=zone.getBoundingClientRect();
     setNoPos(Math.random()*(z.width*0.55)+z.width*0.35, 32);
@@ -1025,7 +1071,7 @@ function initValentine(){
     yesCount++;
     toast.textContent = yesSteps[Math.min(yesCount-1, yesSteps.length-1)];
     addStars(12 + yesCount*10);
-    rain(["✨","💖","💘","⭐"], 18 + yesCount*7);
+    rainEmoji(["✨","💖","💘","⭐"], 18 + yesCount*7);
     vibe(20);
 
     moon.classList.add("glow");
@@ -1043,11 +1089,10 @@ function initValentine(){
 /* ===============================
    FINAL PROMISE + TSUKI
 ================================ */
-const finalOverlay = $("finalOverlay");
 function showFinal(){
   show("finalOverlay");
   addStars(90);
-  rain(["⭐","✨","💖","💘","🌙"], 140);
+  rainEmoji(["⭐","✨","💖","💘","🌙"], 140);
   vibe([60,40,60,40,90]);
 }
 $("closeFinal").onclick=()=> hide("finalOverlay");
@@ -1055,9 +1100,6 @@ $("closeFinal").onclick=()=> hide("finalOverlay");
 /* ===============================
    TSUKI END SCENE
 ================================ */
-const tsukiOverlay = $("tsukiOverlay");
-const loveOverlay = $("loveOverlay");
-
 let tsukiRunning=false;
 let tsukiRAF=0;
 
@@ -1067,14 +1109,14 @@ $("startTsuki").onclick = ()=>{
   startTsukiGame();
 };
 
-$("tsukiClose").onclick = ()=>{
-  stopTsukiGame();
-  hide("tsukiOverlay");
-};
-
 $("tsukiRestart").onclick = ()=>{
   stopTsukiGame();
   startTsukiGame();
+};
+
+$("tsukiClose").onclick = ()=>{
+  stopTsukiGame();
+  hide("tsukiOverlay");
 };
 
 $("closeLove").onclick = ()=> hide("loveOverlay");
@@ -1102,7 +1144,7 @@ function startTsukiGame(){
     cv.removeEventListener("pointerdown", doJump);
   };
 
-  // couple (two blocks holding hands)
+  // couple
   const groundY=270;
   const couple = { x:140, y:groundY-22, vy:0, onG:true, sep:24 };
 
@@ -1117,7 +1159,7 @@ function startTsukiGame(){
   let stars=[];
   let spawnTick=0;
 
-  const targetDist = 5200; // distance to TSUKI
+  const targetDist = 5200;
 
   function aabb(ax,ay,aw,ah, bx,by,bw,bh){
     return ax<bx+bw && ax+aw>bx && ay<by+bh && ay+ah>by;
@@ -1142,13 +1184,11 @@ function startTsukiGame(){
     ctx.fillStyle=grd;
     ctx.fillRect(0,0,W,H);
 
-    // soft moon
     ctx.globalAlpha=.18;
     ctx.beginPath(); ctx.arc(W-110,85,75,0,Math.PI*2);
     ctx.fillStyle="#fff"; ctx.fill();
     ctx.globalAlpha=1;
 
-    // tiny stars
     ctx.globalAlpha=.45;
     for(let i=0;i<48;i++){
       const x=(i*61 + (time*0.9))%W;
@@ -1158,7 +1198,6 @@ function startTsukiGame(){
     }
     ctx.globalAlpha=1;
 
-    // clouds
     ctx.globalAlpha=.18;
     ctx.fillStyle="#fff";
     for(const c of clouds){
@@ -1168,7 +1207,6 @@ function startTsukiGame(){
     }
     ctx.globalAlpha=1;
 
-    // hills
     ctx.globalAlpha=.25;
     ctx.fillStyle="#1b2147";
     for(const h of hills){
@@ -1177,7 +1215,6 @@ function startTsukiGame(){
     }
     ctx.globalAlpha=1;
 
-    // ground
     ctx.fillStyle="#111427";
     ctx.fillRect(0,groundY,W,H-groundY);
 
@@ -1193,7 +1230,6 @@ function startTsukiGame(){
     const y = couple.y;
     const x = couple.x;
 
-    // shadow
     ctx.globalAlpha=.35;
     ctx.fillStyle="#000";
     ctx.beginPath();
@@ -1201,19 +1237,16 @@ function startTsukiGame(){
     ctx.fill();
     ctx.globalAlpha=1;
 
-    // Momo
     ctx.fillStyle="#ff2e63";
     ctx.fillRect(x, y, 14, 22);
     ctx.fillStyle="rgba(255,255,255,.85)";
     ctx.fillRect(x+4, y+6, 3, 3);
 
-    // Cath
     ctx.fillStyle="#78c0ff";
     ctx.fillRect(x+couple.sep, y, 14, 22);
     ctx.fillStyle="rgba(255,255,255,.85)";
     ctx.fillRect(x+couple.sep+4, y+6, 3, 3);
 
-    // hands
     ctx.strokeStyle="rgba(255,255,255,.78)";
     ctx.lineWidth=3;
     ctx.beginPath();
@@ -1240,11 +1273,12 @@ function startTsukiGame(){
   }
 
   function drawTsuki(remaining){
-    if(remaining >= 1400) return;
+    if(remaining >= 1400) return null;
     const x = Math.min(W-140, 160 + (1400-remaining)*0.55);
     const y = 125;
 
     ctx.font="36px system-ui";
+    ctx.fillStyle="#fff";
     ctx.fillText("⭐", x, y);
 
     ctx.font="900 14px system-ui";
@@ -1258,18 +1292,14 @@ function startTsukiGame(){
     ctx.fill();
     ctx.globalAlpha=1;
 
-    // collision box returned
     return {x:x-20, y:y-40, w:70, h:70};
   }
 
   function step(){
     time++;
     traveled += speed;
-
-    // speed up slowly
     speed = Math.min(8.8, speed + 0.00085);
 
-    // gravity
     couple.vy += 0.75;
     couple.y += couple.vy;
 
@@ -1285,15 +1315,13 @@ function startTsukiGame(){
       couple.vy = -12.8;
       couple.onG = false;
       vibe(15);
-      rain(["✨"], 4);
+      rainEmoji(["✨"], 4);
     }
 
-    // spawn
     spawnTick++;
     if(spawnTick % 58 === 0) spawnObstacle();
     if(spawnTick % 42 === 0) spawnStar();
 
-    // move
     for(const o of obs) o.x -= speed;
     for(const s of stars) s.x -= speed;
 
@@ -1302,11 +1330,9 @@ function startTsukiGame(){
 
     const box = {x:couple.x, y:couple.y, w:couple.sep+14, h:22};
 
-    // collisions obstacles
     for(const o of obs){
       if(aabb(box.x,box.y,box.w,box.h, o.x,o.y,o.w,o.h)){
         vibe([40,30,40]);
-        // penalty, not full reset
         traveled = Math.max(0, traveled-220);
         score = Math.max(0, score-2);
         couple.vy = -8;
@@ -1316,19 +1342,17 @@ function startTsukiGame(){
       }
     }
 
-    // collect stars
     for(const s of stars){
       if(s.t) continue;
       if(aabb(box.x,box.y,box.w,box.h, s.x-12,s.y-18, 26,26)){
         s.t=true;
         score++;
         vibe(20);
-        rain(["⭐","✨","💖"], 10);
+        rainEmoji(["⭐","✨","💖"], 10);
       }
     }
 
-    const remaining = Math.max(0, targetDist - traveled);
-    return remaining;
+    return Math.max(0, targetDist - traveled);
   }
 
   tsukiRunning=true;
@@ -1338,10 +1362,8 @@ function startTsukiGame(){
 
     drawBackground();
 
-    // update
     const remaining = step();
 
-    // draw obstacles
     ctx.fillStyle="#2a2f55";
     for(const o of obs){
       ctx.fillRect(o.x,o.y,o.w,o.h);
@@ -1352,7 +1374,6 @@ function startTsukiGame(){
       ctx.fillStyle="#2a2f55";
     }
 
-    // draw stars
     for(const s of stars){
       if(s.t) continue;
       ctx.font="24px system-ui";
@@ -1360,30 +1381,26 @@ function startTsukiGame(){
       ctx.fillText("✨", s.x-10, s.y+10);
     }
 
-    // draw couple
     drawCouple();
 
-    // draw TSUKI
     const tsBox = drawTsuki(remaining);
 
-    // HUD
     drawHUD(remaining);
 
-    // win: reach TSUKI
     if(tsBox){
       const box = {x:couple.x, y:couple.y, w:couple.sep+14, h:22};
-      const hit = aabb(box.x,box.y,box.w,box.h, tsBox.x,tsBox.y,tsBox.w,tsBox.h);
-      if(hit || remaining < 20){
+      if(aabb(box.x,box.y,box.w,box.h, tsBox.x,tsBox.y,tsBox.w,tsBox.h) || remaining < 20){
         gotTsuki=true;
       }
     }
+
     if(gotTsuki){
       tsukiRunning=false;
       cleanupInput();
       hide("tsukiOverlay");
       show("loveOverlay");
       addStars(140);
-      rain(["⭐","✨","💖","💘","🌙"], 190);
+      rainEmoji(["⭐","✨","💖","💘","🌙"], 190);
       vibe([80,40,80,40,120]);
       return;
     }
@@ -1392,7 +1409,6 @@ function startTsukiGame(){
   }
 
   // ensure close cancels cleanly
-  const oldClose = $("tsukiClose").onclick;
   $("tsukiClose").onclick = ()=>{
     cleanupInput();
     stopTsukiGame();
@@ -1403,7 +1419,135 @@ function startTsukiGame(){
 }
 
 /* ===============================
-   HARD SAFETY: initial state
+   SAD NOTE (typewriter + rain)
+================================ */
+const NOTE_TEXT = `accepter les erreurs de l'autre ce n'est pas oublier c'est accepter l'évolution la maturité et avancer a l'aide d'échecs rend un couple plus fort que quiconque et offre une meilleur stabilité mental et émotionnelle  , alors oui Catherine , j'ai merder plusieurs fois surtout au début  car je reste un jeune homme en pleine évolution  et avec un manque d'amour maternelle et de traumatisme , cela ne justifie pas tout mais un amour sincère ne peut se remplacer qu'importe la personne que tu as en face ou que tu es , vie au jour le jour , tu évolue beaucoup j'en suis fière et tes parents aussi j'en suis certains , continue comme ca !!! Je ne pense pas être encore  a la hauteur pour toi mais je me démène pour l'etre , bisous.`;
+
+let typerTimer = 0;
+
+$("openNote").onclick = ()=>{
+  show("noteOverlay");
+  $("rain").classList.remove("hidden");
+  startRain();
+  typeNote(NOTE_TEXT);
+  vibe(25);
+};
+
+$("closeNote").onclick = ()=>{
+  hide("noteOverlay");
+  stopRain();
+  $("rain").classList.add("hidden");
+};
+
+function typeNote(text){
+  const el = $("noteText");
+  clearInterval(typerTimer);
+  el.innerHTML = "";
+  let i=0;
+  const caret = document.createElement("span");
+  caret.className="caret";
+  caret.textContent="|";
+  el.appendChild(caret);
+
+  typerTimer = setInterval(()=>{
+    if(i >= text.length){
+      clearInterval(typerTimer);
+      caret.remove();
+      return;
+    }
+    caret.insertAdjacentText("beforebegin", text[i]);
+    i++;
+    el.scrollTop = el.scrollHeight;
+  }, 18); // vitesse d'écriture
+}
+
+/* Rain canvas */
+let rainRun=false;
+let rainRAF=0;
+function startRain(){
+  const c = $("rain");
+  const ctx = c.getContext("2d");
+  const drops = [];
+
+  function resize(){
+    c.width = innerWidth;
+    c.height = innerHeight;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  for(let i=0;i<220;i++){
+    drops.push({
+      x:Math.random()*c.width,
+      y:Math.random()*c.height,
+      l:Math.random()*18+8,
+      v:Math.random()*8+6,
+      a:Math.random()*0.45+0.15
+    });
+  }
+
+  rainRun=true;
+  function loop(){
+    if(!rainRun) return;
+    ctx.clearRect(0,0,c.width,c.height);
+
+    // dark vignette
+    ctx.globalAlpha=0.18;
+    ctx.fillStyle="#000";
+    ctx.fillRect(0,0,c.width,c.height);
+    ctx.globalAlpha=1;
+
+    for(const d of drops){
+      ctx.globalAlpha=d.a;
+      ctx.strokeStyle="#a9c6ff";
+      ctx.lineWidth=1.2;
+      ctx.beginPath();
+      ctx.moveTo(d.x, d.y);
+      ctx.lineTo(d.x, d.y+d.l);
+      ctx.stroke();
+      d.y += d.v;
+      d.x += 0.25; // wind
+      if(d.y > c.height+30){
+        d.y = -30;
+        d.x = Math.random()*c.width;
+      }
+      if(d.x > c.width+20) d.x = -20;
+    }
+    ctx.globalAlpha=1;
+    rainRAF = requestAnimationFrame(loop);
+  }
+  loop();
+
+  // store cleanup
+  startRain._cleanup = ()=>{
+    rainRun=false;
+    cancelAnimationFrame(rainRAF);
+    window.removeEventListener("resize", resize);
+  };
+}
+function stopRain(){
+  if(startRain._cleanup) startRain._cleanup();
+}
+
+/* ===============================
+   Valentine final
+================================ */
+function showFinal(){
+  show("finalOverlay");
+  addStars(90);
+  rainEmoji(["⭐","✨","💖","💘","🌙"], 140);
+  vibe([60,40,60,40,90]);
+}
+
+$("closeFinal").onclick=()=> hide("finalOverlay");
+
+/* ===============================
+   Love overlay close
+================================ */
+$("closeLove").onclick = ()=> hide("loveOverlay");
+
+/* ===============================
+   Hard safety
 ================================ */
 (function enforceStart(){
   hide("virusOverlay");
@@ -1411,6 +1555,8 @@ function startTsukiGame(){
   hide("finalOverlay");
   hide("tsukiOverlay");
   hide("loveOverlay");
+  hide("noteOverlay");
+  $("rain").classList.add("hidden");
   show("gameOverlay");
 })();
 </script>
