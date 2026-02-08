@@ -3,64 +3,39 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mini-jeu 💖</title>
+  <title>TEST JS</title>
   <style>
-    html,body{height:100%;margin:0}
-    body{
-      display:flex;align-items:center;justify-content:center;
-      background:linear-gradient(#7ec8ff,#dff2ff);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      overflow:hidden;
-    }
-    .wrap{
-      width:min(420px,92vw);
-      background:#1f1f1f;
-      border-radius:22px;
-      padding:12px;
-      box-shadow:0 18px 60px rgba(0,0,0,.35);
-    }
-    .hud{
-      display:flex;justify-content:space-between;gap:10px;
-      color:#fff;background:rgba(0,0,0,.45);
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:999px;
-      padding:8px 12px;
-      font-weight:700;
-      font-size:13px;
-      margin-bottom:10px;
-    }
-    canvas{
-      width:100%;
-      height:auto;
-      display:block;
-      background:#87ceeb;
-      border-radius:14px;
-      border:2px solid rgba(255,255,255,.12);
-    }
-    .controls{
-      margin-top:10px;
-      display:flex;gap:10px;justify-content:center;
-    }
-    .btn{
-      width:70px;height:46px;
-      border:none;border-radius:14px;
-      font-size:18px;font-weight:800;
-      background:#ffffff;
-      cursor:pointer;
-      box-shadow:0 10px 20px rgba(0,0,0,.25);
-      user-select:none;
-    }
-    .tip{
-      margin-top:10px;
-      text-align:center;
-      color:rgba(255,255,255,.9);
-      font-size:13px;
-    }
+    html,body{height:100%;margin:0;display:flex;align-items:center;justify-content:center;background:#87ceeb}
+    #box{background:#111;color:#fff;padding:18px 22px;border-radius:16px;font:700 16px system-ui}
+    canvas{border:4px solid #000;border-radius:12px;background:#9ad9ff;display:block;margin-top:12px}
   </style>
 </head>
-
 <body>
-  <div class="wrap">
-    <div class="hud">
-      <div>⏱️ <span id="time">0.0</span>s</div>
-      <div>💖 <span id="score">
+  <div id="box">
+    <div>✅ Si tu vois un point qui bouge: JS OK</div>
+    <div>Compteur: <span id="n">0</span></div>
+    <canvas id="cv" width="320" height="160"></canvas>
+  </div>
+
+  <script>
+    const n = document.getElementById("n");
+    const cv = document.getElementById("cv");
+    const ctx = cv.getContext("2d");
+    let t = 0;
+
+    setInterval(() => {
+      t++;
+      n.textContent = t;
+
+      ctx.clearRect(0,0,cv.width,cv.height);
+      const x = 20 + (t % 280);
+      const y = 80 + Math.sin(t/10)*40;
+
+      ctx.beginPath();
+      ctx.arc(x, y, 10, 0, Math.PI*2);
+      ctx.fillStyle = "#ff2e63";
+      ctx.fill();
+    }, 50);
+  </script>
+</body>
+</html>
