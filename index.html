@@ -4,186 +4,63 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cath × Momo 💘</title>
-
 <style>
-/* ===================== RESET ===================== */
-*{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden}
-body{
-  font-family:"Comic Sans MS", system-ui, sans-serif;
-  background:#04050a;
-  color:#fff;
-  user-select:none;
-}
-
-/* ===================== MINI GAME ===================== */
-#game{
-  position:fixed;inset:0;z-index:100;
-  background:linear-gradient(#7ec8ff,#dff2ff);
-  display:flex;align-items:center;justify-content:center;
-}
-.gameBox{
-  width:min(520px,92vw);
-  background:#1f1f1f;
-  border-radius:24px;
-  padding:14px;
-  box-shadow:0 20px 70px rgba(0,0,0,.45);
-}
-.hud{
-  display:flex;justify-content:space-between;
-  padding:10px 14px;
-  background:rgba(0,0,0,.45);
-  border-radius:999px;
-  font-weight:900;
-  margin-bottom:10px;
-}
-canvas{width:100%;border-radius:18px;background:#87ceeb}
-.controls{
-  margin-top:10px;
-  display:flex;justify-content:center;gap:10px;
-}
-.ctrl{
-  width:74px;height:48px;
-  border:none;border-radius:16px;
-  font-size:18px;font-weight:900;
-  cursor:pointer;
-}
-
-/* ===================== VIRUS ===================== */
-#virus{
-  position:fixed;inset:0;z-index:50;
-  background:rgba(0,0,0,.6);
-  backdrop-filter:blur(8px);
-  display:none;align-items:center;justify-content:center;
-}
-.virusBox{
-  width:min(820px,92vw);
-  background:#0a0c12;
-  border-radius:24px;
-  padding:18px;
-  text-align:center;
-  box-shadow:0 25px 90px rgba(0,0,0,.6);
-}
-.progress{height:12px;background:#222;border-radius:999px;overflow:hidden;margin:12px 0}
-.progress div{height:100%;width:0%;background:#ff2e63}
-.virusBtn{
-  padding:12px 20px;border:none;border-radius:999px;
-  background:#ff2e63;color:white;font-weight:900;
-  cursor:pointer;
-}
-
-/* ===================== SITE ===================== */
-#site{display:none}
-.pattern{
-  position:fixed;inset:-50%;pointer-events:none;
-}
-.pattern::before{
-  content:"Cath × Momo   Cath × Momo   Cath × Momo   ";
-  position:absolute;inset:0;
-  font-size:3rem;opacity:.08;
-  white-space:nowrap;
-  transform:rotate(-20deg);
-  animation:scroll 40s linear infinite;
-}
-@keyframes scroll{
-  from{transform:translateX(0) rotate(-20deg)}
-  to{transform:translateX(-50%) rotate(-20deg)}
-}
-.moon{
-  position:fixed;top:10%;right:8%;
-  width:150px;height:150px;border-radius:50%;
-  background:radial-gradient(circle at 30% 30%,#fff,#d9d9d9 60%,#aaa);
-  box-shadow:0 0 50px rgba(255,255,255,.4);
-  animation:float 6s ease-in-out infinite;
-}
-@keyframes float{50%{transform:translateY(-18px)}}
-.ui{
-  position:fixed;inset:0;
-  display:flex;align-items:center;justify-content:center;
-}
-.card{
-  width:min(720px,92vw);
-  background:rgba(255,255,255,.12);
-  border-radius:26px;
-  padding:22px;
-  backdrop-filter:blur(10px);
-  text-align:center;
-}
-.row{position:relative;height:110px}
-button.choice{
-  position:absolute;top:26px;
-  padding:14px 28px;border-radius:999px;
-  border:none;font-size:1.1rem;cursor:pointer;
-}
-#yes{left:28%;transform:translateX(-50%);background:#ff2e63;color:white}
-#no{left:72%;transform:translateX(-50%);background:#222;color:white}
-
-/* ===================== FINAL ===================== */
-#final{
-  position:fixed;inset:0;
-  background:rgba(0,0,0,.6);
-  display:none;align-items:center;justify-content:center;
-}
-.finalBox{
-  background:rgba(255,255,255,.12);
-  border-radius:26px;
-  padding:26px;text-align:center;
-}
+html,body{margin:0;height:100%;overflow:hidden;font-family:system-ui;background:#111;color:#fff}
+button{font:inherit;cursor:pointer}
+.center{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.box{background:#1e1e1e;padding:20px;border-radius:16px;text-align:center;width:90%;max-width:520px}
+.btn{padding:12px 18px;border:none;border-radius:999px;margin:6px;font-weight:700}
+.yes{background:#ff2e63;color:#fff}
+.no{background:#333;color:#fff;position:absolute}
+.hidden{display:none}
 </style>
 </head>
-
 <body>
 
-<!-- MINI GAME -->
-<div id="game">
-  <div class="gameBox">
-    <div class="hud">⏱️ <span id="time">0</span>s 💖 <span id="score">0</span></div>
-    <canvas id="cv" width="420" height="220"></canvas>
-    <div class="controls">
-      <button class="ctrl" id="l">◀</button>
-      <button class="ctrl" id="j">▲</button>
-      <button class="ctrl" id="r">▶</button>
-    </div>
+<!-- MINI GAME SIMPLE -->
+<div id="game" class="center">
+  <div class="box">
+    <h2>🎮 Mini-jeu</h2>
+    <p>Clique pour commencer</p>
+    <button class="btn yes" onclick="startVirus()">Jouer</button>
   </div>
 </div>
 
 <!-- VIRUS -->
-<div id="virus">
-  <div class="virusBox">
-    <h2>⚠️ Dossier infecté détecté</h2>
-    <div class="progress"><div id="prog"></div></div>
-    <p>Appuyez pour ouvrir le dossier VIRUS</p>
-    <button class="virusBtn" id="openVirus">Ouvrir le dossier VIRUS</button>
-    <p id="auth" style="display:none">
-      Ai-je l’autorisation de <b>Monsieur Razik Joseph</b> et de
-      <b>Madame Sabrina Yang</b> pour avoir votre fille en valentine
-      et si possible à vie ?
-      <br><br>
-      <button class="virusBtn" id="authYes">OUI</button>
-      <button class="virusBtn" id="authNo">NON</button>
-    </p>
+<div id="virus" class="center hidden">
+  <div class="box">
+    <h2>🦠 Dossier infecté détecté</h2>
+    <p>Clique pour ouvrir le dossier VIRUS</p>
+    <button class="btn yes" onclick="askAuth()">Ouvrir</button>
   </div>
 </div>
 
-<!-- SITE -->
-<div id="site">
-  <div class="pattern"></div>
-  <div class="moon"></div>
-  <div class="ui">
-    <div class="card">
-      <h1>Veux-tu être ma Valentine ? 💘</h1>
-      <p>Cath × Momo 💕</p>
-      <div class="row" id="zone">
-        <button class="choice" id="yes">OUI 💖</button>
-        <button class="choice" id="no">NON 😭</button>
-      </div>
-    </div>
+<!-- AUTORISATION -->
+<div id="auth" class="center hidden">
+  <div class="box">
+    <p>
+      Ai-je l’autorisation de <b>Monsieur Razik Joseph</b> et de
+      <b>Madame Sabrina Yang</b> pour avoir votre fille en valentine
+      et si possible à vie ?
+    </p>
+    <button class="btn yes" onclick="showValentine()">OUI</button>
+    <button class="btn no" id="noBtn">NON</button>
+  </div>
+</div>
+
+<!-- VALENTINE -->
+<div id="val" class="center hidden">
+  <div class="box">
+    <h1>Veux-tu être ma Valentine ? 💘</h1>
+    <p>Cath × Momo 💕</p>
+    <button class="btn yes" onclick="final()">OUI 💖</button>
+    <button class="btn no" id="noBtn2">NON 😭</button>
   </div>
 </div>
 
 <!-- FINAL -->
-<div id="final">
-  <div class="finalBox">
+<div id="final" class="center hidden">
+  <div class="box">
     <h2>🔥 Surprise 🔥</h2>
     <p>dépêche-toi de me faire un câlin…<br>
     ça va chauffer toi et moi plus que tes flammes snap 🔥😏</p>
@@ -191,60 +68,35 @@ button.choice{
 </div>
 
 <script>
-/* MINI GAME SIMPLE */
-const cv=document.getElementById("cv"),ctx=cv.getContext("2d");
-let p={x:20,y:180,vx:0,vy:0,onG:false},g=0.5;
-const heart={x:380,y:60};
-let score=0,start=performance.now();
+const no1=document.getElementById("noBtn");
+const no2=document.getElementById("noBtn2");
 
-function loop(){
-  document.getElementById("time").textContent=((performance.now()-start)/1000).toFixed(1);
-  p.vy+=g;p.x+=p.vx;p.y+=p.vy;
-  if(p.y>190){p.y=190;p.vy=0;p.onG=true}
-  if(Math.abs(p.x-heart.x)<14 && Math.abs(p.y-heart.y)<14){
-    document.getElementById("game").style.display="none";
-    document.getElementById("virus").style.display="flex";
-  }
-  ctx.clearRect(0,0,420,220);
-  ctx.fillRect(p.x,p.y,14,14);
-  ctx.fillStyle="#ff4d6d";ctx.fillRect(heart.x,heart.y,14,14);
-  requestAnimationFrame(loop);
+function dodge(btn){
+  btn.onmouseenter=()=>{
+    btn.style.left=Math.random()*60+20+"%";
+    btn.style.top=Math.random()*60+20+"%";
+  };
 }
-loop();
+dodge(no1); dodge(no2);
 
-document.onkeydown=e=>{
-  if(e.key==="ArrowLeft")p.vx=-2;
-  if(e.key==="ArrowRight")p.vx=2;
-  if(e.key==="ArrowUp"&&p.onG){p.vy=-8;p.onG=false}
-};
-document.onkeyup=()=>p.vx=0;
-
-/* VIRUS FLOW */
-let prog=0;
-setInterval(()=>{
-  prog=Math.min(100,prog+5);
-  document.getElementById("prog").style.width=prog+"%";
-},200);
-
-openVirus.onclick=()=>{
-  auth.style.display="block";
-};
-authYes.onclick=()=>{
-  virus.style.display="none";
-  site.style.display="block";
-};
-authNo.onclick=()=>{
-  authNo.style.transform="translateX("+(Math.random()*120-60)+"px)";
-};
-
-/* VALENTINE */
-no.onmousemove=()=>{
-  no.style.left=Math.random()*80+10+"%";
-};
-yes.onclick=()=>{
-  document.getElementById("final").style.display="flex";
-};
+function startVirus(){
+  game.classList.add("hidden");
+  virus.classList.remove("hidden");
+}
+function askAuth(){
+  virus.classList.add("hidden");
+  auth.classList.remove("hidden");
+}
+function showValentine(){
+  auth.classList.add("hidden");
+  val.classList.remove("hidden");
+}
+function final(){
+  val.classList.add("hidden");
+  document.getElementById("final").classList.remove("hidden");
+}
 </script>
 
 </body>
 </html>
+
