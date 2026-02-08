@@ -1,147 +1,66 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini jeu 💖</title>
-
-<style>
-html,body{
-  margin:0;
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#87ceeb;
-  font-family:Arial, sans-serif;
-}
-canvas{
-  background:#87ceeb;
-  border:4px solid #333;
-}
-#hud{
-  position:fixed;
-  top:10px;
-  background:rgba(0,0,0,.6);
-  color:white;
-  padding:8px 14px;
-  border-radius:999px;
-  display:flex;
-  gap:16px;
-}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini-jeu 💖</title>
+  <style>
+    html,body{height:100%;margin:0}
+    body{
+      display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(#7ec8ff,#dff2ff);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      overflow:hidden;
+    }
+    .wrap{
+      width:min(420px,92vw);
+      background:#1f1f1f;
+      border-radius:22px;
+      padding:12px;
+      box-shadow:0 18px 60px rgba(0,0,0,.35);
+    }
+    .hud{
+      display:flex;justify-content:space-between;gap:10px;
+      color:#fff;background:rgba(0,0,0,.45);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:999px;
+      padding:8px 12px;
+      font-weight:700;
+      font-size:13px;
+      margin-bottom:10px;
+    }
+    canvas{
+      width:100%;
+      height:auto;
+      display:block;
+      background:#87ceeb;
+      border-radius:14px;
+      border:2px solid rgba(255,255,255,.12);
+    }
+    .controls{
+      margin-top:10px;
+      display:flex;gap:10px;justify-content:center;
+    }
+    .btn{
+      width:70px;height:46px;
+      border:none;border-radius:14px;
+      font-size:18px;font-weight:800;
+      background:#ffffff;
+      cursor:pointer;
+      box-shadow:0 10px 20px rgba(0,0,0,.25);
+      user-select:none;
+    }
+    .tip{
+      margin-top:10px;
+      text-align:center;
+      color:rgba(255,255,255,.9);
+      font-size:13px;
+    }
+  </style>
 </head>
 
 <body>
-
-<div id="hud">
-  ⏱️ <span id="time">0.0</span>s |
-  💖 <span id="score">0</span>
-</div>
-
-<canvas id="game" width="360" height="200"></canvas>
-
-<script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-const timeEl = document.getElementById("time");
-const scoreEl = document.getElementById("score");
-
-let startTime = performance.now();
-let score = 0;
-
-const player = {
-  x: 20, y: 150,
-  w: 14, h: 14,
-  vx: 0, vy: 0,
-  onGround: false
-};
-
-const gravity = 0.4;
-
-const platforms = [
-  {x:0,y:180,w:360,h:20},
-  {x:80,y:140,w:60,h:10},
-  {x:170,y:110,w:60,h:10},
-  {x:260,y:80,w:60,h:10}
-];
-
-const heart = {x:310,y:50,w:14,h:14, taken:false};
-
-function update(){
-  const t = ((performance.now()-startTime)/1000).toFixed(1);
-  timeEl.textContent = t;
-
-  player.vy += gravity;
-  player.x += player.vx;
-  player.y += player.vy;
-
-  player.onGround = false;
-
-  platforms.forEach(p=>{
-    if(player.x < p.x+p.w &&
-       player.x+player.w > p.x &&
-       player.y+player.h <= p.y+10 &&
-       player.y+player.h+player.vy >= p.y){
-        player.y = p.y-player.h;
-        player.vy = 0;
-        player.onGround = true;
-    }
-  });
-
-  if(player.y > canvas.height){
-    player.x = 20;
-    player.y = 150;
-    player.vy = 0;
-  }
-
-  if(!heart.taken &&
-     player.x < heart.x+heart.w &&
-     player.x+player.w > heart.x &&
-     player.y < heart.y+heart.h &&
-     player.y+player.h > heart.y){
-      heart.taken = true;
-      score++;
-      scoreEl.textContent = score;
-      setTimeout(()=>{
-        alert("💖 Bravo ! Tu as gagné !");
-      },100);
-  }
-}
-
-function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  ctx.fillStyle="#654321";
-  platforms.forEach(p=>ctx.fillRect(p.x,p.y,p.w,p.h));
-
-  if(!heart.taken){
-    ctx.fillStyle="#ff4d6d";
-    ctx.fillRect(heart.x,heart.y,heart.w,heart.h);
-  }
-
-  ctx.fillStyle="#222";
-  ctx.fillRect(player.x,player.y,player.w,player.h);
-}
-
-function loop(){
-  update();
-  draw();
-  requestAnimationFrame(loop);
-}
-loop();
-
-document.addEventListener("keydown",e=>{
-  if(e.key==="ArrowRight") player.vx = 2;
-  if(e.key==="ArrowLeft") player.vx = -2;
-  if(e.key==="ArrowUp" && player.onGround){
-    player.vy = -8;
-    player.onGround = false;
-  }
-});
-document.addEventListener("keyup",()=>player.vx=0);
-</script>
-
-</body>
-</html>
+  <div class="wrap">
+    <div class="hud">
+      <div>⏱️ <span id="time">0.0</span>s</div>
+      <div>💖 <span id="score">
