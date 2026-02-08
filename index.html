@@ -1,892 +1,250 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Cath × Momo 💘</title>
-  <style>
-    :root{
-      --yes:#ff2e63;
-      --no:#222;
-      --glass:rgba(255,255,255,.12);
-      --border:rgba(255,255,255,.22);
-      --shadow:rgba(0,0,0,.35);
-      --txt:rgba(255,255,255,.95);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;overflow:hidden}
-    body{
-      font-family:"Comic Sans MS", system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background:#04050a;
-      color:var(--txt);
-      user-select:none;
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cath × Momo 💘</title>
 
-    /* =========================
-       MINI GAME (overlay)
-       ========================= */
-    #gameOverlay{
-      position:fixed; inset:0; z-index:100;
-      display:flex; align-items:center; justify-content:center;
-      background: linear-gradient(#7ec8ff,#dff2ff);
-      padding:18px;
-    }
-    .gameShell{
-      width:min(520px, 92vw);
-      background:#1f1f1f;
-      border-radius:24px;
-      padding:14px;
-      box-shadow:0 20px 70px rgba(0,0,0,.35);
-    }
-    .hud{
-      display:flex; justify-content:space-between; gap:10px;
-      background: rgba(0,0,0,.45);
-      border:1px solid rgba(255,255,255,.14);
-      padding:10px 12px;
-      border-radius:999px;
-      font: 800 13px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      margin-bottom:12px;
-      color:#fff;
-    }
-    .hud span{opacity:.95}
-    #gameCanvas{
-      width:100%;
-      height:auto;
-      display:block;
-      background: #87ceeb;
-      border-radius:18px;
-      border: 2px solid rgba(255,255,255,.12);
-    }
-    .gameTip{
-      margin:10px 4px 0;
-      text-align:center;
-      color: rgba(255,255,255,.9);
-      font: 700 13px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    }
-    .controls{
-      margin-top:10px;
-      display:flex; justify-content:center; gap:10px;
-    }
-    .ctrlBtn{
-      width:74px; height:48px;
-      border:none; border-radius:16px;
-      background:#fff;
-      font: 900 18px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      box-shadow:0 10px 22px rgba(0,0,0,.25);
-      cursor:pointer;
-      user-select:none;
-      touch-action: manipulation;
-    }
+<style>
+/* ===================== RESET ===================== */
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{
+  font-family:"Comic Sans MS", system-ui, sans-serif;
+  background:#04050a;
+  color:#fff;
+  user-select:none;
+}
 
-    /* Smooth fade to site */
-    .fadeOut{
-      animation: fadeOut .55s ease forwards;
-    }
-    @keyframes fadeOut{
-      to{ opacity:0; transform: scale(1.01); }
-    }
+/* ===================== MINI GAME ===================== */
+#game{
+  position:fixed;inset:0;z-index:100;
+  background:linear-gradient(#7ec8ff,#dff2ff);
+  display:flex;align-items:center;justify-content:center;
+}
+.gameBox{
+  width:min(520px,92vw);
+  background:#1f1f1f;
+  border-radius:24px;
+  padding:14px;
+  box-shadow:0 20px 70px rgba(0,0,0,.45);
+}
+.hud{
+  display:flex;justify-content:space-between;
+  padding:10px 14px;
+  background:rgba(0,0,0,.45);
+  border-radius:999px;
+  font-weight:900;
+  margin-bottom:10px;
+}
+canvas{width:100%;border-radius:18px;background:#87ceeb}
+.controls{
+  margin-top:10px;
+  display:flex;justify-content:center;gap:10px;
+}
+.ctrl{
+  width:74px;height:48px;
+  border:none;border-radius:16px;
+  font-size:18px;font-weight:900;
+  cursor:pointer;
+}
 
-    /* =========================
-       MAIN SITE
-       ========================= */
-    #site{
-      position:fixed; inset:0;
-      display:none;
-    }
+/* ===================== VIRUS ===================== */
+#virus{
+  position:fixed;inset:0;z-index:50;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;
+}
+.virusBox{
+  width:min(820px,92vw);
+  background:#0a0c12;
+  border-radius:24px;
+  padding:18px;
+  text-align:center;
+  box-shadow:0 25px 90px rgba(0,0,0,.6);
+}
+.progress{height:12px;background:#222;border-radius:999px;overflow:hidden;margin:12px 0}
+.progress div{height:100%;width:0%;background:#ff2e63}
+.virusBtn{
+  padding:12px 20px;border:none;border-radius:999px;
+  background:#ff2e63;color:white;font-weight:900;
+  cursor:pointer;
+}
 
-    /* 3D background canvas */
-    #bg{
-      position:fixed; inset:0; z-index:0;
-      width:100%; height:100%;
-    }
+/* ===================== SITE ===================== */
+#site{display:none}
+.pattern{
+  position:fixed;inset:-50%;pointer-events:none;
+}
+.pattern::before{
+  content:"Cath × Momo   Cath × Momo   Cath × Momo   ";
+  position:absolute;inset:0;
+  font-size:3rem;opacity:.08;
+  white-space:nowrap;
+  transform:rotate(-20deg);
+  animation:scroll 40s linear infinite;
+}
+@keyframes scroll{
+  from{transform:translateX(0) rotate(-20deg)}
+  to{transform:translateX(-50%) rotate(-20deg)}
+}
+.moon{
+  position:fixed;top:10%;right:8%;
+  width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,#fff,#d9d9d9 60%,#aaa);
+  box-shadow:0 0 50px rgba(255,255,255,.4);
+  animation:float 6s ease-in-out infinite;
+}
+@keyframes float{50%{transform:translateY(-18px)}}
+.ui{
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.card{
+  width:min(720px,92vw);
+  background:rgba(255,255,255,.12);
+  border-radius:26px;
+  padding:22px;
+  backdrop-filter:blur(10px);
+  text-align:center;
+}
+.row{position:relative;height:110px}
+button.choice{
+  position:absolute;top:26px;
+  padding:14px 28px;border-radius:999px;
+  border:none;font-size:1.1rem;cursor:pointer;
+}
+#yes{left:28%;transform:translateX(-50%);background:#ff2e63;color:white}
+#no{left:72%;transform:translateX(-50%);background:#222;color:white}
 
-    /* Cath × Momo pattern */
-    .pattern{
-      position:fixed; inset:-50%;
-      z-index:1; pointer-events:none;
-      opacity:1;
-    }
-    .pattern::before{
-      content:"Cath × Momo   Cath × Momo   Cath × Momo   Cath × Momo   Cath × Momo   ";
-      position:absolute; inset:0;
-      font-size:3rem;
-      opacity:.09;
-      white-space:nowrap;
-      transform: rotate(-20deg);
-      animation: scroll 38s linear infinite;
-    }
-    @keyframes scroll{
-      from{ transform: translateX(0) rotate(-20deg); }
-      to{ transform: translateX(-50%) rotate(-20deg); }
-    }
-
-    /* Stars layer */
-    #stars{
-      position:fixed; inset:0;
-      z-index:1; pointer-events:none;
-    }
-    .star{
-      position:absolute;
-      font-size:18px;
-      opacity:0;
-      animation: twinkle 2.3s ease-in-out infinite;
-    }
-    @keyframes twinkle{
-      0%{ opacity:0; transform: translateY(0) scale(.9); }
-      35%{ opacity:.85; }
-      65%{ opacity:.25; }
-      100%{ opacity:0; transform: translateY(-14px) scale(1.08); }
-    }
-
-    /* Moon */
-    .moon{
-      position:fixed;
-      top:10%; right:8%;
-      width:150px; height:150px;
-      border-radius:50%;
-      background:radial-gradient(circle at 30% 30%, #fff, #d9d9d9 60%, #aaa 100%);
-      box-shadow:0 0 50px rgba(255,255,255,.40);
-      z-index:1;
-      pointer-events:none;
-      transition: transform .12s ease, box-shadow .25s ease;
-      animation: moonFloat 6s ease-in-out infinite;
-    }
-    @keyframes moonFloat{
-      0%,100%{ transform: translateY(0); }
-      50%{ transform: translateY(-18px); }
-    }
-    .moon.glow{
-      box-shadow:0 0 90px rgba(255,180,210,.95);
-    }
-
-    /* UI */
-    .ui{
-      position:fixed; inset:0;
-      z-index:2;
-      display:flex; align-items:center; justify-content:center;
-      pointer-events:none;
-      padding:18px;
-    }
-    .card{
-      pointer-events:auto;
-      width:min(760px, 92vw);
-      padding:20px;
-      border-radius:26px;
-      background: var(--glass);
-      border: 1px solid var(--border);
-      box-shadow: 0 18px 60px var(--shadow);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      text-align:center;
-      animation: popIn .7s ease;
-    }
-    @keyframes popIn{
-      from{ opacity:0; transform: translateY(10px) scale(.98); }
-      to{ opacity:1; transform: translateY(0) scale(1); }
-    }
-    h1{
-      margin:4px 0 10px;
-      font-size: clamp(2rem, 4vw, 3rem);
-      text-shadow:0 14px 30px rgba(0,0,0,.35);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse{
-      0%,100%{ transform: scale(1); }
-      50%{ transform: scale(1.05); }
-    }
-    .sub{opacity:.95;margin:0 0 10px}
-    .toast{
-      min-height:30px;
-      display:flex; justify-content:center; align-items:center;
-      margin: 6px 0 10px;
-      font-size: 1rem;
-    }
-    .toast span{
-      display:inline-block;
-      padding:7px 12px;
-      border-radius:999px;
-      background: rgba(0,0,0,.22);
-      border:1px solid rgba(255,255,255,.15);
-      backdrop-filter: blur(8px);
-    }
-
-    .row{
-      position:relative;
-      height:110px;
-      margin-top:8px;
-    }
-    .btn{
-      position:absolute;
-      top:26px;
-      border:none;
-      border-radius:999px;
-      padding:14px 28px;
-      font-size:1.15rem;
-      cursor:pointer;
-      box-shadow:0 12px 28px rgba(0,0,0,.35);
-      user-select:none;
-      transition: transform .12s ease, filter .12s ease;
-      will-change:left,top,transform;
-    }
-    .btn:active{transform:scale(.98)}
-    #yesBtn{
-      left:28%;
-      transform:translateX(-50%);
-      background:var(--yes);
-      color:#fff;
-    }
-    #yesBtn:hover{filter:brightness(1.06)}
-    #noBtn{
-      left:72%;
-      transform:translateX(-50%);
-      background:var(--no);
-      color:#fff;
-    }
-    .tip{
-      margin-top:10px;
-      opacity:.9;
-      font-size:.95rem;
-    }
-    .shake{ animation: shake .45s ease; }
-    @keyframes shake{
-      0%,100%{ transform: translateX(0); }
-      20%{ transform: translateX(-10px); }
-      40%{ transform: translateX(10px); }
-      60%{ transform: translateX(-8px); }
-      80%{ transform: translateX(8px); }
-    }
-
-    /* Emoji particles */
-    .particle{
-      position:fixed;
-      top:-12vh;
-      font-size:2.2rem;
-      pointer-events:none;
-      z-index:6;
-      filter: drop-shadow(0 12px 14px rgba(0,0,0,.28));
-      will-change:transform,opacity;
-    }
-
-    /* Final overlay */
-    #finalOverlay{
-      position:fixed; inset:0; z-index:20;
-      display:none; align-items:center; justify-content:center;
-      background: rgba(0,0,0,.60);
-      padding:18px;
-    }
-    .finalCard{
-      width:min(720px, 92vw);
-      padding:26px;
-      border-radius:26px;
-      background: rgba(255,255,255,.12);
-      border:1px solid rgba(255,255,255,.25);
-      backdrop-filter: blur(12px);
-      text-align:center;
-      box-shadow:0 20px 70px rgba(0,0,0,.45);
-      animation: popIn .25s ease;
-    }
-    .finalCard h2{margin:0 0 10px}
-    .finalCard p{margin:0; font-size:1.15rem; line-height:1.35}
-    .closeBtn{
-      margin-top:14px;
-      display:inline-block;
-      background: rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.18);
-      color:#fff;
-      padding:10px 14px;
-      border-radius:999px;
-      cursor:pointer;
-    }
-  </style>
+/* ===================== FINAL ===================== */
+#final{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;align-items:center;justify-content:center;
+}
+.finalBox{
+  background:rgba(255,255,255,.12);
+  border-radius:26px;
+  padding:26px;text-align:center;
+}
+</style>
 </head>
 
 <body>
 
-  <!-- =========================
-       MINI GAME OVERLAY
-       ========================= -->
-  <div id="gameOverlay">
-    <div class="gameShell">
-      <div class="hud">
-        <span>⏱️ <b id="t">0.0</b>s</span>
-        <span>💖 <b id="sc">0</b></span>
-        <span>🎯 <b id="need">3</b></span>
-      </div>
-
-      <canvas id="gameCanvas" width="420" height="240"></canvas>
-
-      <div class="controls">
-        <button class="ctrlBtn" id="L">◀</button>
-        <button class="ctrlBtn" id="J">▲</button>
-        <button class="ctrlBtn" id="R">▶</button>
-      </div>
-
-      <div class="gameTip">Attrape <b>3</b> cœurs 💖 puis touche le gros cœur final 💘</div>
-      <div class="gameTip" style="opacity:.8">PC: ← → ↑</div>
+<!-- MINI GAME -->
+<div id="game">
+  <div class="gameBox">
+    <div class="hud">⏱️ <span id="time">0</span>s 💖 <span id="score">0</span></div>
+    <canvas id="cv" width="420" height="220"></canvas>
+    <div class="controls">
+      <button class="ctrl" id="l">◀</button>
+      <button class="ctrl" id="j">▲</button>
+      <button class="ctrl" id="r">▶</button>
     </div>
   </div>
+</div>
 
-  <!-- =========================
-       MAIN SITE
-       ========================= -->
-  <div id="site">
-    <canvas id="bg"></canvas>
-    <div class="pattern"></div>
-    <div id="stars"></div>
-    <div class="moon" id="moon"></div>
+<!-- VIRUS -->
+<div id="virus">
+  <div class="virusBox">
+    <h2>⚠️ Dossier infecté détecté</h2>
+    <div class="progress"><div id="prog"></div></div>
+    <p>Appuyez pour ouvrir le dossier VIRUS</p>
+    <button class="virusBtn" id="openVirus">Ouvrir le dossier VIRUS</button>
+    <p id="auth" style="display:none">
+      Ai-je l’autorisation de <b>Monsieur Razik Joseph</b> et de
+      <b>Madame Sabrina Yang</b> pour avoir votre fille en valentine
+      et si possible à vie ?
+      <br><br>
+      <button class="virusBtn" id="authYes">OUI</button>
+      <button class="virusBtn" id="authNo">NON</button>
+    </p>
+  </div>
+</div>
 
-    <div class="ui">
-      <div class="card" id="card">
-        <h1>Veux-tu être ma Valentine ? 💘</h1>
-        <div class="sub">Cath × Momo 💕</div>
-        <div class="toast"><span id="toast">Choisis bien… 😏</span></div>
-
-        <div class="row" id="zone">
-          <button class="btn" id="yesBtn">OUI 💖</button>
-          <button class="btn" id="noBtn">NON 😭</button>
-        </div>
-
-        <div class="tip">Plus tu dis OUI… plus le ciel devient rempli d’étoiles ✨</div>
-      </div>
-    </div>
-
-    <div id="finalOverlay">
-      <div class="finalCard">
-        <h2>🔥 Surprise 🔥</h2>
-        <p>
-          dépêche-toi de me faire un câlin…<br>
-          ça va chauffer toi et moi plus que tes flammes snap 🔥😏
-        </p>
-        <div class="closeBtn" id="closeFinal">Fermer</div>
+<!-- SITE -->
+<div id="site">
+  <div class="pattern"></div>
+  <div class="moon"></div>
+  <div class="ui">
+    <div class="card">
+      <h1>Veux-tu être ma Valentine ? 💘</h1>
+      <p>Cath × Momo 💕</p>
+      <div class="row" id="zone">
+        <button class="choice" id="yes">OUI 💖</button>
+        <button class="choice" id="no">NON 😭</button>
       </div>
     </div>
   </div>
-
-  <!-- three.js only used after game win -->
-  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-
-  <script>
-  /* =========================================================
-     MINI GAME — Mario-like (stable + mobile)
-     ========================================================= */
-  (() => {
-    const overlay = document.getElementById("gameOverlay");
-    const site = document.getElementById("site");
-
-    const cv = document.getElementById("gameCanvas");
-    const ctx = cv.getContext("2d");
-
-    const tEl = document.getElementById("t");
-    const scEl = document.getElementById("sc");
-    const needEl = document.getElementById("need");
-
-    const L = document.getElementById("L");
-    const R = document.getElementById("R");
-    const J = document.getElementById("J");
-
-    // World
-    const W = cv.width, H = cv.height;
-
-    // Camera (side scrolling)
-    let camX = 0;
-
-    // Time/score
-    const start = performance.now();
-    let score = 0;
-    const need = 3;
-    needEl.textContent = String(need);
-
-    // Player physics
-    const player = {
-      x: 30, y: 0,
-      w: 16, h: 16,
-      vx: 0, vy: 0,
-      onG: false
-    };
-    const g = 0.55;
-    const moveSpeed = 2.6;
-    const jumpVel = -9.8;
-    const friction = 0.82;
-
-    // Level geometry (world coords)
-    const groundY = 210;
-    const plats = [
-      {x:0,   y:groundY, w:1600, h:30, type:"ground"},
-      {x:120, y:170, w:80, h:12},
-      {x:250, y:145, w:90, h:12},
-      {x:400, y:120, w:90, h:12},
-      {x:560, y:155, w:90, h:12},
-      {x:720, y:130, w:90, h:12},
-      {x:900, y:150, w:120, h:12},
-      {x:1100,y:120, w:110, h:12},
-    ];
-
-    // Mobile platforms
-    const movers = [
-      {x:320, y:185, w:90, h:12, minX:300, maxX:520, v:1.35},
-      {x:980, y:175, w:90, h:12, minX:950, maxX:1180, v:1.15},
-    ];
-
-    // Hearts
-    const hearts = [
-      {x:155,y:150,taken:false},
-      {x:285,y:122,taken:false},
-      {x:430,y:95,taken:false},
-      {x:760,y:105,taken:false},
-      {x:1120,y:92,taken:false},
-    ];
-
-    // Final goal (big heart) appears once score >= need
-    const goal = {x:1400,y:130,w:22,h:22, active:false};
-
-    // Input state
-    const keys = {left:false,right:false,up:false};
-
-    function aabb(ax,ay,aw,ah, bx,by,bw,bh){
-      return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
-    }
-
-    function setKey(k, v){ keys[k]=v; }
-
-    function bindHold(btn, onDown, onUp){
-      const down = (e)=>{ e.preventDefault(); onDown(); };
-      const up = (e)=>{ e.preventDefault(); onUp(); };
-
-      btn.addEventListener("touchstart", down, {passive:false});
-      btn.addEventListener("touchend", up, {passive:false});
-      btn.addEventListener("touchcancel", up, {passive:false});
-      btn.addEventListener("mousedown", down);
-      btn.addEventListener("mouseup", up);
-      btn.addEventListener("mouseleave", up);
-    }
-
-    bindHold(L, ()=>setKey("left",true), ()=>setKey("left",false));
-    bindHold(R, ()=>setKey("right",true), ()=>setKey("right",false));
-    bindHold(J, ()=>setKey("up",true), ()=>setKey("up",false));
-
-    window.addEventListener("keydown", (e)=>{
-      if(e.key==="ArrowLeft") setKey("left", true);
-      if(e.key==="ArrowRight") setKey("right", true);
-      if(e.key==="ArrowUp") setKey("up", true);
-    });
-    window.addEventListener("keyup", (e)=>{
-      if(e.key==="ArrowLeft") setKey("left", false);
-      if(e.key==="ArrowRight") setKey("right", false);
-      if(e.key==="ArrowUp") setKey("up", false);
-    });
-
-    function resetPlayer(){
-      player.x = 30;
-      player.y = 0;
-      player.vx = 0;
-      player.vy = 0;
-      camX = 0;
-    }
-
-    function updateMovers(){
-      for(const m of movers){
-        m.x += m.v;
-        if(m.x < m.minX || m.x > m.maxX) m.v *= -1;
-      }
-    }
-
-    function physicsStep(){
-      // time
-      const tt = ((performance.now() - start)/1000).toFixed(1);
-      tEl.textContent = tt;
-
-      // input -> velocity
-      if(keys.left)  player.vx = -moveSpeed;
-      if(keys.right) player.vx =  moveSpeed;
-      if(!keys.left && !keys.right) player.vx *= friction;
-
-      // jump
-      if(keys.up && player.onG){
-        player.vy = jumpVel;
-        player.onG = false;
-      }
-
-      // gravity
-      player.vy += g;
-
-      // move
-      player.x += player.vx;
-      player.y += player.vy;
-
-      // bounds floor
-      player.onG = false;
-
-      // collision with platforms from above (stable)
-      const solids = [...plats, ...movers];
-      for(const p of solids){
-        const falling = player.vy >= 0;
-        const wasAbove = (player.y + player.h - player.vy) <= p.y;
-        const nowOver  = (player.y + player.h) >= p.y;
-        const xOverlap = (player.x + player.w) > p.x && player.x < (p.x + p.w);
-
-        if(falling && wasAbove && nowOver && xOverlap){
-          player.y = p.y - player.h;
-          player.vy = 0;
-          player.onG = true;
-
-          // stick to moving platform slightly
-          if(movers.includes(p)){
-            player.x += p.v * 0.65;
-          }
-        }
-      }
-
-      // fall reset
-      if(player.y > H + 120){
-        resetPlayer();
-      }
-
-      // collect hearts
-      for(const h of hearts){
-        if(h.taken) continue;
-        if(aabb(player.x,player.y,player.w,player.h, h.x,h.y,14,14)){
-          h.taken = true;
-          score++;
-          scEl.textContent = String(score);
-        }
-      }
-
-      // goal activation
-      goal.active = score >= need;
-
-      // reach goal
-      if(goal.active && aabb(player.x,player.y,player.w,player.h, goal.x,goal.y,goal.w,goal.h)){
-        win();
-      }
-
-      // camera follows player (world -> screen)
-      const target = player.x - W*0.45;
-      camX += (target - camX) * 0.08;
-      camX = Math.max(0, Math.min(camX, 1600 - W));
-    }
-
-    function draw(){
-      // sky
-      ctx.clearRect(0,0,W,H);
-
-      // parallax clouds
-      ctx.globalAlpha = 0.25;
-      ctx.fillStyle = "#fff";
-      const cx = -(camX*0.25);
-      ctx.beginPath(); ctx.ellipse(cx+120, 46, 44, 18, 0, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(cx+165, 46, 28, 12, 0, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(cx+340, 64, 52, 22, 0, 0, Math.PI*2); ctx.fill();
-      ctx.globalAlpha = 1;
-
-      // ground + platforms
-      const drawRect = (x,y,w,h,fill,stroke)=>{
-        const sx = x - camX;
-        ctx.fillStyle = fill;
-        ctx.fillRect(sx,y,w,h);
-        if(stroke){
-          ctx.strokeStyle = stroke;
-          ctx.lineWidth = 2;
-          ctx.strokeRect(sx+1,y+1,w-2,h-2);
-        }
-      };
-
-      for(const p of plats){
-        if(p.type==="ground") drawRect(p.x,p.y,p.w,p.h,"#6b3f1f","#40210c");
-        else drawRect(p.x,p.y,p.w,p.h,"#7a4a25","#40210c");
-      }
-      for(const m of movers){
-        drawRect(m.x,m.y,m.w,m.h,"#2d2f3a","#0b0c10");
-        // glow edge
-        ctx.globalAlpha = 0.35;
-        drawRect(m.x,m.y-2,m.w,2,"#ffffff");
-        ctx.globalAlpha = 1;
-      }
-
-      // hearts
-      for(const h of hearts){
-        if(h.taken) continue;
-        const sx = h.x - camX;
-        ctx.fillStyle = "#ff4d6d";
-        ctx.fillRect(sx,h.y,14,14);
-        ctx.fillStyle = "rgba(255,255,255,.85)";
-        ctx.fillRect(sx+5,h.y+4,4,4);
-      }
-
-      // goal
-      if(goal.active){
-        const gx = goal.x - camX;
-        ctx.fillStyle = "#ff2e63";
-        ctx.fillRect(gx, goal.y, goal.w, goal.h);
-        ctx.fillStyle = "rgba(255,255,255,.9)";
-        ctx.fillRect(gx+8, goal.y+6, 6, 6);
-        ctx.font = "900 12px system-ui";
-        ctx.fillStyle = "rgba(0,0,0,.45)";
-        ctx.fillText("GO!", gx-2, goal.y-6);
-      }else{
-        // hint arrow
-        ctx.font = "900 12px system-ui";
-        ctx.fillStyle = "rgba(0,0,0,.35)";
-        ctx.fillText(`Encore ${need-score} 💖`, W-110, 22);
-      }
-
-      // player
-      const px = player.x - camX;
-      ctx.fillStyle = "#111";
-      ctx.fillRect(px, player.y, player.w, player.h);
-      // tiny face highlight
-      ctx.fillStyle = "rgba(255,255,255,.35)";
-      ctx.fillRect(px+10, player.y+4, 3, 3);
-    }
-
-    let raf;
-    function tick(){
-      updateMovers();
-      physicsStep();
-      draw();
-      raf = requestAnimationFrame(tick);
-    }
-
-    function win(){
-      cancelAnimationFrame(raf);
-      overlay.classList.add("fadeOut");
-      setTimeout(()=>{
-        overlay.style.display="none";
-        site.style.display="block";
-        startValentineSite(); // init big site
-      }, 520);
-    }
-
-    resetPlayer();
-    tick();
-  })();
-
-  /* =========================================================
-     VALENTINE SITE (big scene + interactions)
-     ========================================================= */
-  function startValentineSite(){
-    // Elements
-    const moon = document.getElementById("moon");
-    const starsLayer = document.getElementById("stars");
-    const toast = document.getElementById("toast");
-    const yesBtn = document.getElementById("yesBtn");
-    const noBtn  = document.getElementById("noBtn");
-    const zone   = document.getElementById("zone");
-    const card   = document.getElementById("card");
-    const finalOverlay = document.getElementById("finalOverlay");
-    const closeFinal = document.getElementById("closeFinal");
-
-    // ===== Emoji rain (clean + stable)
-    function rain(emojis, count){
-      for(let i=0;i<count;i++){
-        const p = document.createElement("div");
-        p.className = "particle";
-        p.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-        p.style.left = (Math.random()*100) + "vw";
-        p.style.opacity = (Math.random()*0.45 + 0.55).toFixed(2);
-        p.style.fontSize = (Math.random()*18 + 32) + "px";
-        const dur = Math.random()*2200 + 2200;
-        document.body.appendChild(p);
-
-        const startX = (Math.random()*40 - 20);
-        const endX = (Math.random()*160 - 80);
-        p.animate([
-          { transform:`translate(${startX}px,0) rotate(0deg)`, opacity:p.style.opacity },
-          { transform:`translate(${endX}px,120vh) rotate(${Math.random()*360}deg)`, opacity:0 }
-        ], { duration: dur, easing: "linear" });
-
-        setTimeout(()=>p.remove(), dur+60);
-      }
-    }
-
-    function shake(){
-      card.classList.remove("shake");
-      void card.offsetWidth;
-      card.classList.add("shake");
-    }
-
-    // ===== Stars (more YES => more stars)
-    function addStars(n){
-      for(let i=0;i<n;i++){
-        const s = document.createElement("div");
-        s.className = "star";
-        s.textContent = (Math.random()<0.6) ? "✨" : "⭐";
-        s.style.left = (Math.random()*100) + "vw";
-        s.style.top  = (Math.random()*100) + "vh";
-        s.style.animationDuration = (Math.random()*1.2 + 1.6) + "s";
-        starsLayer.appendChild(s);
-        setTimeout(()=>s.remove(), 2600);
-      }
-    }
-
-    // ===== Moon parallax + glow on YES
-    let mx=0,my=0;
-    window.addEventListener("mousemove", (e)=>{
-      mx = (e.clientX/window.innerWidth - .5);
-      my = (e.clientY/window.innerHeight - .5);
-      moon.style.transform = `translate(${mx*18}px, ${my*18}px)`;
-    }, {passive:true});
-
-    // ===== NO button: dodge + phrases
-    const noHoverPhrases = [
-      "T’es sûre de toi ? 😳",
-      "Attends… réfléchis 😭",
-      "Tu rigoles pas là ? 🫣",
-      "Vraiment NON ? 💔",
-      "Dernière chance… 😤"
-    ];
-    const noClickPhrases = [
-      "Aïe… 💔",
-      "Cathy stp… 🥺",
-      "Non non non… re-choisis 😤",
-      "Tu me fais mal 😭",
-      "Ok… mais je boude 😤"
-    ];
-    let noHover = 0, noClick = 0;
-
-    function setNoPos(leftPx, topPx){
-      const z = zone.getBoundingClientRect();
-      const b = noBtn.getBoundingClientRect();
-      const bw=b.width, bh=b.height;
-      const x = Math.max(10, Math.min(leftPx, z.width - bw - 10));
-      const y = Math.max(8,  Math.min(topPx, z.height - bh - 8));
-      noBtn.style.left = (x + bw/2) + "px";
-      noBtn.style.top  = y + "px";
-      noBtn.style.transform = "translateX(-50%)";
-    }
-
-    function nudgeNoAway(mouseX, mouseY){
-      const z = zone.getBoundingClientRect();
-      const b = noBtn.getBoundingClientRect();
-      const nbx = (b.left + b.width/2) - z.left;
-      const nby = (b.top + b.height/2) - z.top;
-      const dx = mouseX - nbx;
-      const dy = mouseY - nby;
-      const dist = Math.hypot(dx,dy);
-      if(dist < 110){
-        const push = 140;
-        const px = nbx - (dx/(dist||1))*push;
-        const py = nby - (dy/(dist||1))*(push*0.28);
-        setNoPos(px - b.width/2, py - 18);
-      }
-    }
-
-    zone.addEventListener("mousemove", (e)=>{
-      const z = zone.getBoundingClientRect();
-      nudgeNoAway(e.clientX - z.left, e.clientY - z.top);
-    }, {passive:true});
-
-    noBtn.addEventListener("mouseenter", ()=>{
-      toast.textContent = noHoverPhrases[noHover++ % noHoverPhrases.length];
-      // small relocate (hesitation)
-      const z = zone.getBoundingClientRect();
-      setNoPos(z.width*0.62 + Math.random()*40, 26 + Math.random()*10);
-    });
-
-    noBtn.addEventListener("click", ()=>{
-      toast.textContent = noClickPhrases[noClick++ % noClickPhrases.length];
-      shake();
-      rain(["💔","😭","🥲","😤","🫠"], 44);
-      const z = zone.getBoundingClientRect();
-      setNoPos(Math.random()*(z.width*0.55) + z.width*0.35, 26);
-    });
-
-    // ===== YES flow: more clicks => more stars => final
-    const yesSteps = [
-      "T’es sûre ? 😳",
-      "Genre OUI OUI ? 💘",
-      "Après ça c’est sérieux 😏",
-      "Dernière confirmation… 💍",
-      "OK… officiel 😍"
-    ];
-    let yesCount = 0;
-
-    yesBtn.addEventListener("click", ()=>{
-      yesCount++;
-
-      toast.textContent = yesSteps[Math.min(yesCount-1, yesSteps.length-1)];
-      addStars(10 + yesCount*8);
-      rain(["✨","💖","💘","⭐"], 14 + yesCount*6);
-
-      moon.classList.add("glow");
-      setTimeout(()=>moon.classList.remove("glow"), 520);
-
-      // little bounce
-      yesBtn.style.transform = "translateX(-50%) scale(1.06)";
-      setTimeout(()=>yesBtn.style.transform = "translateX(-50%)", 140);
-
-      if(yesCount >= 5){
-        finalOverlay.style.display = "flex";
-        addStars(80 + yesCount*25);
-        rain(["⭐","✨","💖","💘","🌙"], 120);
-      }
-    });
-
-    closeFinal.addEventListener("click", ()=>{
-      finalOverlay.style.display = "none";
-    });
-    finalOverlay.addEventListener("click", (e)=>{
-      if(e.target === finalOverlay) finalOverlay.style.display = "none";
-    });
-
-    // ===== Three.js Minecraft-ish background (interactive camera)
-    const canvas = document.getElementById("bg");
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias:false, powerPreference:"high-performance" });
-    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x06070c);
-
-    const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 220);
-    camera.position.set(0, 10, 26);
-
-    scene.add(new THREE.HemisphereLight(0xffcce0, 0x2b2f55, 1.1));
-    const dir = new THREE.DirectionalLight(0xffffff, 0.65);
-    dir.position.set(10, 20, 10);
-    scene.add(dir);
-
-    const geo = new THREE.BoxGeometry(1,1,1);
-    const mat = new THREE.MeshLambertMaterial({ color: 0x4caf50 });
-
-    const size = 40;
-    const mesh = new THREE.InstancedMesh(geo, mat, size*size);
-    scene.add(mesh);
-
-    const dummy = new THREE.Object3D();
-    let idx = 0;
-    for(let x=0;x<size;x++){
-      for(let z=0;z<size;z++){
-        const h = Math.sin(x*0.28)*0.9 + Math.cos(z*0.28)*0.9 + Math.sin((x+z)*0.15)*0.6;
-        dummy.position.set(x - size/2, h, z - size/2);
-        dummy.updateMatrix();
-        mesh.setMatrixAt(idx++, dummy.matrix);
-      }
-    }
-
-    function resize(){
-      renderer.setSize(innerWidth, innerHeight, false);
-      camera.aspect = innerWidth / innerHeight;
-      camera.updateProjectionMatrix();
-    }
-    addEventListener("resize", resize);
-    resize();
-
-    let pmx=0,pmy=0;
-    addEventListener("mousemove", (e)=>{
-      pmx = (e.clientX/innerWidth - .5)*2;
-      pmy = (e.clientY/innerHeight - .5)*2;
-    }, {passive:true});
-
-    function animate(t){
-      requestAnimationFrame(animate);
-      const tt = t * 0.00032;
-      camera.position.x = Math.sin(tt) * 6 + pmx * 3.2;
-      camera.position.y = 10 + (-pmy * 2.0) + Math.sin(tt*1.6)*0.55;
-      camera.position.z = 26 + Math.cos(tt) * 1.8;
-      camera.lookAt(0, 2, 0);
-      renderer.render(scene, camera);
-    }
-    requestAnimationFrame(animate);
+</div>
+
+<!-- FINAL -->
+<div id="final">
+  <div class="finalBox">
+    <h2>🔥 Surprise 🔥</h2>
+    <p>dépêche-toi de me faire un câlin…<br>
+    ça va chauffer toi et moi plus que tes flammes snap 🔥😏</p>
+  </div>
+</div>
+
+<script>
+/* MINI GAME SIMPLE */
+const cv=document.getElementById("cv"),ctx=cv.getContext("2d");
+let p={x:20,y:180,vx:0,vy:0,onG:false},g=0.5;
+const heart={x:380,y:60};
+let score=0,start=performance.now();
+
+function loop(){
+  document.getElementById("time").textContent=((performance.now()-start)/1000).toFixed(1);
+  p.vy+=g;p.x+=p.vx;p.y+=p.vy;
+  if(p.y>190){p.y=190;p.vy=0;p.onG=true}
+  if(Math.abs(p.x-heart.x)<14 && Math.abs(p.y-heart.y)<14){
+    document.getElementById("game").style.display="none";
+    document.getElementById("virus").style.display="flex";
   }
-  </script>
+  ctx.clearRect(0,0,420,220);
+  ctx.fillRect(p.x,p.y,14,14);
+  ctx.fillStyle="#ff4d6d";ctx.fillRect(heart.x,heart.y,14,14);
+  requestAnimationFrame(loop);
+}
+loop();
+
+document.onkeydown=e=>{
+  if(e.key==="ArrowLeft")p.vx=-2;
+  if(e.key==="ArrowRight")p.vx=2;
+  if(e.key==="ArrowUp"&&p.onG){p.vy=-8;p.onG=false}
+};
+document.onkeyup=()=>p.vx=0;
+
+/* VIRUS FLOW */
+let prog=0;
+setInterval(()=>{
+  prog=Math.min(100,prog+5);
+  document.getElementById("prog").style.width=prog+"%";
+},200);
+
+openVirus.onclick=()=>{
+  auth.style.display="block";
+};
+authYes.onclick=()=>{
+  virus.style.display="none";
+  site.style.display="block";
+};
+authNo.onclick=()=>{
+  authNo.style.transform="translateX("+(Math.random()*120-60)+"px)";
+};
+
+/* VALENTINE */
+no.onmousemove=()=>{
+  no.style.left=Math.random()*80+10+"%";
+};
+yes.onclick=()=>{
+  document.getElementById("final").style.display="flex";
+};
+</script>
+
 </body>
 </html>
